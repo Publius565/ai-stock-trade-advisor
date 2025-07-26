@@ -81,10 +81,14 @@ This document provides a comprehensive listing of all folders and files in the A
   - **trading_engine.py** - Core trading engine with signal generation and portfolio management (350 lines)
   - **rules_engine.py** - Advanced rules engine with 5 default trading rules (450 lines)
   - **signal_generator.py** - Signal generator coordinating trading and rules engines (400 lines)
+  - **trade_suggestion_engine.py** - Intelligent trade suggestions with risk assessment and rationale (450 lines)
 - **`/src/execution/`** - Trade execution and tracking modules
   - **`__init__.py`** - Package initialization
-- **`/src/ml_models/`** - Machine learning and AI components
-  - **`__init__.py`** - Package initialization
+- **`/src/ml_models/`** - Machine learning and AI components (PHASE 3 COMPLETE)
+  - **`__init__.py`** - Package initialization with ML component exports
+  - **model_manager.py** - ML model lifecycle, training, persistence, and versioning (250 lines)
+  - **feature_engineering.py** - Technical indicator pipeline with 40+ features (400 lines)
+  - **prediction_engine.py** - Real-time prediction generation with multi-model aggregation (350 lines)
 - **`/src/ui/`** - User interface components (REFACTORED - Modular Architecture)
   - **`__init__.py`** - Package initialization
   - **main_window.py** - Main application orchestrator (~350 lines, reduced from 1022)
@@ -121,6 +125,7 @@ This document provides a comprehensive listing of all folders and files in the A
   - **test_database.py** - Database infrastructure and manager tests
   - **test_ui_components.py** - Modular UI component tests
 - **test_trading_engine.py** - Comprehensive trading engine component tests (25+ test cases)
+- **test_ml_components.py** - Machine learning components tests (27 test cases, 66.7% success rate)
 - **test_runner.py** - Comprehensive test runner with categorization
 - **`/scripts/`** - Utility scripts for setup, deployment, and maintenance
   - **init_database.py** - Database initialization script with verification

@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2025-07-26
+
+### Added
+- **PHASE 3 COMPLETE - Machine Learning Components**: Comprehensive ML system implementation
+- **Model Manager**: Complete ModelManager class with model lifecycle, training, persistence, and versioning
+- **Feature Engineering Pipeline**: Advanced FeatureEngineer with 40+ technical indicators (SMA/EMA, RSI, MACD, Bollinger Bands, etc.)
+- **Prediction Engine**: Real-time PredictionEngine with multi-model aggregation and confidence scoring
+- **Trade Suggestion Engine**: Intelligent TradeSuggestionEngine with high-risk/high-reward and low-risk/low-reward recommendations
+- **ML Model Support**: Random Forest, Gradient Boosting, and Linear Regression models with automatic scaling
+- **Technical Indicators**: Comprehensive technical analysis including momentum, volatility, and trend indicators
+- **Risk Assessment**: Advanced risk scoring with user profile compatibility and position sizing
+- **Explainable AI**: Human-readable rationale generation for all trading suggestions
+- **Model Performance Tracking**: Cross-validation, R² scoring, and feature importance analysis
+- **Comprehensive Testing**: Full test suite for ML components with 27 test cases (66.7% success rate)
+- **Model Persistence**: Save/load functionality for trained models with metadata preservation
+- **Prediction History**: Complete prediction tracking with accuracy metrics and performance analysis
+- **Suggestion Filtering**: Advanced filtering and ranking based on confidence, risk level, and expected value
+
+### Fixed
+- **Model Name Extraction**: Fixed gradient_boosting model name extraction from saved files
+- **Deprecated Pandas Methods**: Updated fillna() calls to use ffill() and bfill() methods
+- **Test Import Issues**: Fixed Python path issues for proper module imports in tests
+- **Dependency Installation**: Added scikit-learn, pandas, numpy dependencies for ML functionality
+
 ## [0.3.1] - 2025-07-26
 
 ### Added
