@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Planned
+- Rule-based expert system implementation
+- Machine learning components development
+- Trade suggestion engine with dual-tier recommendations
+- Interactive charts and visualizations
+- Advanced analytics and portfolio optimization
+- News sentiment analysis integration
+- Strategy customization features
+
+## [0.2.0] - 2025-07-26
+
 ### Added
 - **MAJOR REFACTORING - Modular UI Architecture**: Complete refactoring of main_window.py from 1,022 lines to ~350 lines (66% reduction)
 - **Modular UI Components**: Created dedicated components - ProfileTab, MarketScannerTab, WatchlistTab, DashboardTab
@@ -101,8 +112,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `debug_schema.py` (debugging script, not needed in production)
   - `quick_api_test.py` (functionality covered by `test_api_connections.py`)
 
-
-
 ### Fixed
 - **CRITICAL SECURITY**: Exposed Alpha Vantage API key remediated - sanitized from all documentation and configuration files, replaced with secure placeholder
 - **API Key Configuration**: Application now properly handles missing Alpha Vantage API key with Yahoo Finance fallback
@@ -161,6 +170,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version History
 
+### Version 0.2.0 (2025-07-26) - Core Infrastructure Complete
+- **Major Milestone**: Phase 2 completion with user profile management and market scanner
+- **Features**: Complete data ingestion layer, user profile system, market scanner, smart watchlist
+- **Architecture**: Modular UI design, optimized database schema, comprehensive testing
+- **Status**: Core infrastructure operational, ready for trading engine development
+
 ### Version 0.1.0 (2025-07-26)
 - **Initial Release**: Project documentation and planning phase
 - **Features**: Complete project specification, architecture design, and development roadmap
@@ -169,14 +184,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Planned Future Versions
 
-#### Version 0.2.0 (Planned)
-- **Target**: Core infrastructure implementation
-- **Features**: Data ingestion layer, user profile system, basic database setup
-- **Status**: Not started
-
 #### Version 0.3.0 (Planned)
 - **Target**: Trading engine development
-- **Features**: Rule-based system, initial ML models, trade suggestion engine
+- **Features**: Rule-based expert system, initial ML models, trade suggestion engine
 - **Status**: Not started
 
 #### Version 0.4.0 (Planned)
@@ -185,8 +195,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Status**: Not started
 
 #### Version 0.5.0 (Planned)
-- **Target**: User interface implementation
-- **Features**: Desktop GUI, interactive charts, user notifications
+- **Target**: User interface enhancement
+- **Features**: Interactive charts, user notifications, advanced visualizations
 - **Status**: Not started
 
 #### Version 1.0.0 (Planned)

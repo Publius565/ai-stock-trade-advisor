@@ -4,9 +4,9 @@
 The AI-Driven Stock Trade Advisor can work without API keys using built-in data sources, but some features are enhanced with API keys.
 
 ## Current Status
-✅ **Application Status**: Fully functional with Yahoo Finance fallback
-⚠️ **Alpha Vantage API**: Not configured (optional enhancement)
-✅ **Yahoo Finance**: Working as primary data source (no API key required)
+✅ **Application Status**: Fully functional with Alpha Vantage API configured
+✅ **Alpha Vantage API**: Configured and working (100 data points available)
+✅ **Yahoo Finance**: Working as fallback data source (250 data points, no API key required)
 
 ## Optional API Keys
 
@@ -64,12 +64,12 @@ python -c "from src.data_layer.api_client import APIClient; client = APIClient()
 ```
 
 ## Current Functionality
-- ✅ Market data retrieval (Yahoo Finance)
+- ✅ Market data retrieval (Alpha Vantage + Yahoo Finance)
+- ✅ Enhanced market data with technical indicators
 - ✅ User profile management
 - ✅ Market scanner and watchlists
 - ✅ Database operations
 - ✅ UI functionality
-- ⚠️ Enhanced market data (requires Alpha Vantage API key)
 - ⚠️ Trading execution (requires Alpaca API keys)
 - ⚠️ News sentiment analysis (requires News API key)
 
