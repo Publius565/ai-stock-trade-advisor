@@ -9,12 +9,14 @@ __author__ = "Apollo Developer"
 __description__ = "AI-Driven Stock Trade Advisor - Personalized trading recommendations using rule-based logic and machine learning"
 
 # Import main components for easy access
+# Core modules will be imported as they are implemented
 from . import data_layer
+from . import utils
 
-# TODO: Uncomment when these modules are implemented
+# Future imports (to be implemented)
 # from . import profile
 # from . import strategy
-# from . import execution
+# from . import execution  
 # from . import ml_models
 # from . import ui
 # from . import utils 
