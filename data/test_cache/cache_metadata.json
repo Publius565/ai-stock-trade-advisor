@@ -1,0 +1,27 @@
+{
+  "entries": {
+    "43e969a783d6e18377987dadca3dfe6f": {
+      "symbol": "AAPL",
+      "data_type": "market_data",
+      "created": "2025-07-26T14:18:58.893203",
+      "expires": "2025-07-27T14:18:58.892204",
+      "size": 7141
+    },
+    "3c3796b1071071514b48556aca2081a4": {
+      "symbol": "MSFT",
+      "data_type": "market_data",
+      "created": "2025-07-26T14:18:59.030400",
+      "expires": "2025-07-27T14:18:59.028897",
+      "size": 7141
+    },
+    "a77a5d25681761cea9fea99e2570e557": {
+      "symbol": "AAPL",
+      "data_type": "company_info",
+      "created": "2025-07-26T14:18:59.199304",
+      "expires": "2025-08-02T14:18:59.199304",
+      "size": 252
+    }
+  },
+  "total_size": 14534,
+  "created": "2025-07-26T14:18:58.763956"
+}

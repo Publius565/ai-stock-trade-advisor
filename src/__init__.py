@@ -10,9 +10,11 @@ __description__ = "AI-Driven Stock Trade Advisor - Personalized trading recommen
 
 # Import main components for easy access
 from . import data_layer
-from . import profile
-from . import strategy
-from . import execution
-from . import ml_models
-from . import ui
-from . import utils 
+
+# TODO: Uncomment when these modules are implemented
+# from . import profile
+# from . import strategy
+# from . import execution
+# from . import ml_models
+# from . import ui
+# from . import utils 
