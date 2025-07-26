@@ -35,7 +35,8 @@ class SignalGenerator:
         self.db_manager = db_manager
         self.trading_engine = trading_engine
         self.rules_engine = RulesEngine()
-        self.market_data_manager = MarketDataManager(db_manager)
+        cache_dir = getattr(db_manager, 'get_cache_dir', lambda: "data/cache")()
+        self.market_data_manager = MarketDataManager(cache_dir)
         self.logger = logging.getLogger(__name__)
         
         # Signal tracking

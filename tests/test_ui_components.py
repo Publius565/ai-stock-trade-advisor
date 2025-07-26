@@ -12,12 +12,7 @@ from unittest.mock import Mock, patch, MagicMock
 # Add src to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-# Mock PyQt6 before importing UI components
-sys.modules['PyQt6'] = MagicMock()
-sys.modules['PyQt6.QtWidgets'] = MagicMock()
-sys.modules['PyQt6.QtCore'] = MagicMock()
-sys.modules['PyQt6.QtGui'] = MagicMock()
-
+# Import UI components without mocking PyQt6 for structure tests
 from src.ui.components.profile_tab import ProfileTab
 from src.ui.components.market_scanner_tab import MarketScannerTab
 from src.ui.components.watchlist_tab import WatchlistTab
@@ -81,11 +76,20 @@ class TestProfileTabLogic(unittest.TestCase):
     
     def setUp(self):
         """Set up test environment."""
-        # Mock PyQt6 components
-        with patch('src.ui.components.profile_tab.QWidget'):
-            with patch('src.ui.components.profile_tab.QVBoxLayout'):
-                with patch('src.ui.components.profile_tab.QGridLayout'):
-                    self.profile_tab = ProfileTab()
+        # Mock PyQt6 components at the class level
+        with patch('PyQt6.QtWidgets.QWidget'), \
+             patch('PyQt6.QtWidgets.QVBoxLayout'), \
+             patch('PyQt6.QtWidgets.QGridLayout'), \
+             patch('PyQt6.QtWidgets.QHBoxLayout'), \
+             patch('PyQt6.QtWidgets.QPushButton'), \
+             patch('PyQt6.QtWidgets.QLabel'), \
+             patch('PyQt6.QtWidgets.QLineEdit'), \
+             patch('PyQt6.QtWidgets.QTextEdit'), \
+             patch('PyQt6.QtWidgets.QComboBox'), \
+             patch('PyQt6.QtWidgets.QGroupBox'), \
+             patch('PyQt6.QtWidgets.QMessageBox'), \
+             patch('PyQt6.QtCore.pyqtSignal'):
+            self.profile_tab = ProfileTab()
     
     def test_profile_manager_setting(self):
         """Test setting profile manager."""
@@ -108,9 +112,22 @@ class TestMarketScannerTabLogic(unittest.TestCase):
     
     def setUp(self):
         """Set up test environment."""
-        with patch('src.ui.components.market_scanner_tab.QWidget'):
-            with patch('src.ui.components.market_scanner_tab.QVBoxLayout'):
-                self.scanner_tab = MarketScannerTab()
+        with patch('PyQt6.QtWidgets.QWidget'), \
+             patch('PyQt6.QtWidgets.QVBoxLayout'), \
+             patch('PyQt6.QtWidgets.QGridLayout'), \
+             patch('PyQt6.QtWidgets.QPushButton'), \
+             patch('PyQt6.QtWidgets.QLabel'), \
+             patch('PyQt6.QtWidgets.QComboBox'), \
+             patch('PyQt6.QtWidgets.QSpinBox'), \
+             patch('PyQt6.QtWidgets.QGroupBox'), \
+             patch('PyQt6.QtWidgets.QTableWidget'), \
+             patch('PyQt6.QtWidgets.QTableWidgetItem'), \
+             patch('PyQt6.QtWidgets.QMessageBox'), \
+             patch('PyQt6.QtWidgets.QProgressBar'), \
+             patch('PyQt6.QtCore.QThread'), \
+             patch('PyQt6.QtCore.pyqtSignal'), \
+             patch('PyQt6.QtCore.Qt'):
+            self.scanner_tab = MarketScannerTab()
     
     def test_market_scanner_setting(self):
         """Test setting market scanner."""
@@ -141,9 +158,19 @@ class TestWatchlistTabLogic(unittest.TestCase):
     
     def setUp(self):
         """Set up test environment."""
-        with patch('src.ui.components.watchlist_tab.QWidget'):
-            with patch('src.ui.components.watchlist_tab.QVBoxLayout'):
-                self.watchlist_tab = WatchlistTab()
+        with patch('PyQt6.QtWidgets.QWidget'), \
+             patch('PyQt6.QtWidgets.QVBoxLayout'), \
+             patch('PyQt6.QtWidgets.QGridLayout'), \
+             patch('PyQt6.QtWidgets.QPushButton'), \
+             patch('PyQt6.QtWidgets.QLabel'), \
+             patch('PyQt6.QtWidgets.QLineEdit'), \
+             patch('PyQt6.QtWidgets.QSpinBox'), \
+             patch('PyQt6.QtWidgets.QGroupBox'), \
+             patch('PyQt6.QtWidgets.QTableWidget'), \
+             patch('PyQt6.QtWidgets.QTableWidgetItem'), \
+             patch('PyQt6.QtWidgets.QMessageBox'), \
+             patch('PyQt6.QtCore.pyqtSignal'):
+            self.watchlist_tab = WatchlistTab()
     
     def test_profile_manager_setting(self):
         """Test setting profile manager."""
@@ -167,10 +194,17 @@ class TestDashboardTabLogic(unittest.TestCase):
     
     def setUp(self):
         """Set up test environment."""
-        with patch('src.ui.components.dashboard_tab.QWidget'):
-            with patch('src.ui.components.dashboard_tab.QVBoxLayout'):
-                with patch('src.ui.components.dashboard_tab.QTimer'):
-                    self.dashboard_tab = DashboardTab()
+        with patch('PyQt6.QtWidgets.QWidget'), \
+             patch('PyQt6.QtWidgets.QVBoxLayout'), \
+             patch('PyQt6.QtWidgets.QHBoxLayout'), \
+             patch('PyQt6.QtWidgets.QGridLayout'), \
+             patch('PyQt6.QtWidgets.QPushButton'), \
+             patch('PyQt6.QtWidgets.QLabel'), \
+             patch('PyQt6.QtWidgets.QTextEdit'), \
+             patch('PyQt6.QtWidgets.QGroupBox'), \
+             patch('PyQt6.QtCore.pyqtSignal'), \
+             patch('PyQt6.QtCore.QTimer'):
+            self.dashboard_tab = DashboardTab()
     
     def test_manager_setting(self):
         """Test setting managers."""

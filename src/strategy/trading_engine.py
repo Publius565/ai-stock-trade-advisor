@@ -65,7 +65,8 @@ class TradingEngine:
     def __init__(self, db_manager: DatabaseManager, profile_manager: ProfileManager):
         self.db_manager = db_manager
         self.profile_manager = profile_manager
-        self.market_data_manager = MarketDataManager(db_manager)
+        cache_dir = getattr(db_manager, 'get_cache_dir', lambda: "data/cache")()
+        self.market_data_manager = MarketDataManager(cache_dir)
         self.logger = logging.getLogger(__name__)
         
         # Trading state

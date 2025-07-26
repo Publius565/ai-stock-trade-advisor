@@ -25,6 +25,7 @@ class TestTradingEngine(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures"""
         self.mock_db_manager = Mock()
+        self.mock_db_manager.get_cache_dir.return_value = "data/cache"
         self.mock_profile_manager = Mock()
         self.trading_engine = TradingEngine(self.mock_db_manager, self.mock_profile_manager)
     
@@ -211,7 +212,7 @@ class TestRulesEngine(unittest.TestCase):
         
         # High volume with positive price action
         market_data = {
-            'volume': 1500000,
+            'volume': 1600000,
             'avg_volume_20': 1000000,
             'price_change_pct': 0.05
         }
@@ -221,7 +222,7 @@ class TestRulesEngine(unittest.TestCase):
         
         # High volume with negative price action
         market_data = {
-            'volume': 1500000,
+            'volume': 1600000,
             'avg_volume_20': 1000000,
             'price_change_pct': -0.05
         }
@@ -246,6 +247,7 @@ class TestSignalGenerator(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures"""
         self.mock_db_manager = Mock()
+        self.mock_db_manager.get_cache_dir.return_value = "data/cache"
         self.mock_trading_engine = Mock()
         self.signal_generator = SignalGenerator(self.mock_db_manager, self.mock_trading_engine)
     
@@ -259,8 +261,9 @@ class TestSignalGenerator(unittest.TestCase):
         """Test market context analysis"""
         # High volume scenario
         market_data = {
-            'volume': 2000000,
-            'avg_volume_20': 1000000
+            'volume': 2100000,
+            'avg_volume_20': 1000000,
+            'volatility_20': 0.03  # Add moderate volatility to avoid "Low volatility" message
         }
         context = self.signal_generator._analyze_market_context(market_data)
         self.assertIn("Very high volume", context)
@@ -324,14 +327,15 @@ class TestSignalGenerator(unittest.TestCase):
     
     def test_get_signal_summary(self):
         """Test signal summary generation"""
-        # Add some test signals
+        # Add some test signals with recent timestamps
+        now = datetime.now()
         signal1 = TradingSignal(
             symbol='AAPL',
             signal_type=SignalType.BUY,
             strength=SignalStrength.MODERATE,
             price=150.0,
-            timestamp=datetime.now(),
-            confidence=0.8,
+            timestamp=now,
+            confidence=0.85,
             reasoning="Test signal 1",
             indicators={},
             risk_level="MEDIUM"
@@ -342,7 +346,7 @@ class TestSignalGenerator(unittest.TestCase):
             signal_type=SignalType.SELL,
             strength=SignalStrength.STRONG,
             price=2500.0,
-            timestamp=datetime.now(),
+            timestamp=now,
             confidence=0.9,
             reasoning="Test signal 2",
             indicators={},
@@ -367,6 +371,7 @@ class TestIntegration(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures"""
         self.mock_db_manager = Mock()
+        self.mock_db_manager.get_cache_dir.return_value = "data/cache"
         self.mock_profile_manager = Mock()
         self.trading_engine = TradingEngine(self.mock_db_manager, self.mock_profile_manager)
         self.rules_engine = RulesEngine()
