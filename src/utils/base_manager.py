@@ -70,9 +70,22 @@ class BaseDatabaseManager(ABC):
     
     def _ensure_database_exists(self):
         """Ensure database schema exists."""
-        schema_path = Path("config/optimized_database_schema.sql")
+        # Try multiple possible schema file locations
+        script_dir = Path(__file__).parent.parent.parent
+        schema_paths = [
+            script_dir / "config" / "optimized_database_schema.sql",
+            script_dir / "config" / "database_schema.sql",
+            Path("config/optimized_database_schema.sql"),
+            Path("config/database_schema.sql")
+        ]
         
-        if schema_path.exists():
+        schema_path = None
+        for path in schema_paths:
+            if path.exists():
+                schema_path = path
+                break
+        
+        if schema_path and schema_path.exists():
             with self._lock:
                 conn = self._get_connection()
                 
@@ -88,7 +101,9 @@ class BaseDatabaseManager(ABC):
                     
                     conn.executescript(schema_sql)
                     conn.commit()
-                    logger.info("Database schema initialized")
+                    logger.info(f"Database schema initialized from {schema_path}")
+        else:
+            logger.warning(f"Schema file not found in any of these locations: {schema_paths}")
     
     def generate_uid(self, prefix: str = "obj") -> str:
         """
