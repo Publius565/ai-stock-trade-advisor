@@ -48,6 +48,8 @@ class APIClient:
         """Validate API configuration and keys."""
         if not self.alpha_vantage_key or self.alpha_vantage_key == 'your_alpha_vantage_api_key_here':
             logger.warning("Alpha Vantage API key not configured. Some features may be limited.")
+        else:
+            logger.info("Alpha Vantage API key configured successfully")
         
         logger.info("API client initialized successfully")
     

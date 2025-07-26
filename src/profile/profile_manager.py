@@ -408,4 +408,74 @@ class ProfileManager:
         if not (0 < max_position <= 1):
             errors.append("Max position percentage must be between 0 and 1")
         
-        return len(errors) == 0, errors 
+        return len(errors) == 0, errors
+    
+    def get_user_profile_by_username(self, username: str) -> Optional[Dict[str, Any]]:
+        """
+        Get user profile by username.
+        
+        Args:
+            username: Username to search for
+            
+        Returns:
+            User profile dictionary or None if not found
+        """
+        try:
+            user_data = self.db.get_user(username=username)
+            if not user_data:
+                return None
+            
+            # Get user watchlists
+            watchlists = self.get_user_watchlists(user_data['uid'])
+            
+            # Get user preferences
+            preferences = self.get_user_preferences(user_data['uid'])
+            
+            # Combine all profile data
+            profile = {
+                'user': user_data,
+                'watchlists': watchlists,
+                'preferences': preferences
+            }
+            
+            return profile
+        except Exception as e:
+            logger.error(f"Failed to get user profile by username: {e}")
+            return None
+    
+    def update_user_profile(self, user_uid: str, profile_data: Dict[str, Any]) -> bool:
+        """
+        Update user profile data.
+        
+        Args:
+            user_uid: User UID
+            profile_data: Updated profile data
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            # Validate the data first
+            is_valid, errors = self.validate_profile_data(profile_data)
+            if not is_valid:
+                logger.error(f"Invalid profile data: {errors}")
+                return False
+            
+            # Update user data
+            success = self.db.update_user(
+                uid=user_uid,
+                username=profile_data.get('username'),
+                email=profile_data.get('email'),
+                risk_profile=profile_data.get('risk_profile')
+            )
+            
+            if success:
+                logger.info(f"Updated user profile: {user_uid}")
+                return True
+            else:
+                logger.error(f"Failed to update user profile: {user_uid}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"Failed to update user profile: {e}")
+            return False 

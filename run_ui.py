@@ -60,15 +60,23 @@ def ensure_database_exists():
         # Check if database has correct schema by testing a simple query
         try:
             import sqlite3
-            conn = sqlite3.connect(db_path, timeout=5)
+            conn = sqlite3.connect(db_path, timeout=10)
             cursor = conn.cursor()
             
-            # Check if users table has uid column
+            # Check if users table exists and has uid column
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users'")
+            if not cursor.fetchone():
+                print("Users table not found. Reinitializing...")
+                conn.close()
+                init_database()
+                return
+            
             cursor.execute("PRAGMA table_info(users)")
             columns = [col[1] for col in cursor.fetchall()]
             
             if 'uid' not in columns:
                 print("Database schema outdated. Reinitializing...")
+                conn.close()
                 init_database()
             else:
                 print("Database schema verified.")
@@ -90,8 +98,12 @@ def init_database():
     """Initialize database with correct schema."""
     try:
         from init_database import init_database as init_db
-        init_db("data/trading_advisor.db")
-        print("Database initialized successfully.")
+        success = init_db("data/trading_advisor.db")
+        if success:
+            print("Database initialized successfully.")
+        else:
+            print("Database initialization failed. Creating minimal database...")
+            create_minimal_database()
     except Exception as e:
         print(f"Failed to initialize database: {e}")
         # Fallback: create minimal database
@@ -133,7 +145,7 @@ def create_minimal_database():
 def main():
     """Main launcher function."""
     try:
-        # Load environment variables first
+        # Load environment variables first - BEFORE any other imports
         from dotenv import load_dotenv
         load_dotenv('config/api_keys.env')
         
