@@ -23,7 +23,8 @@ from src.utils.database_manager import DatabaseManager
 from src.profile.profile_manager import ProfileManager
 from src.data_layer.market_scanner import MarketScanner
 from src.ui.components import (
-    ProfileTab, MarketScannerTab, WatchlistTab, DashboardTab
+    ProfileTab, MarketScannerTab, WatchlistTab, DashboardTab, 
+    MLPredictionsTab, TradingSignalsTab
 )
 
 logger = logging.getLogger(__name__)
@@ -44,6 +45,8 @@ class MainWindow(QMainWindow):
         self.scanner_tab = None
         self.watchlist_tab = None
         self.dashboard_tab = None
+        self.ml_predictions_tab = None
+        self.trading_signals_tab = None
         
         self.init_ui()
         self.init_database()
@@ -88,6 +91,14 @@ class MainWindow(QMainWindow):
         self.watchlist_tab = WatchlistTab()
         self.tab_widget.addTab(self.watchlist_tab, "Watchlist")
         
+        # ML Predictions Tab - NEW FEATURE
+        self.ml_predictions_tab = MLPredictionsTab()
+        self.tab_widget.addTab(self.ml_predictions_tab, "🤖 AI Predictions")
+        
+        # Trading Signals Tab - NEW FEATURE  
+        self.trading_signals_tab = TradingSignalsTab()
+        self.tab_widget.addTab(self.trading_signals_tab, "📈 Trading Signals")
+        
         # Dashboard Tab
         self.dashboard_tab = DashboardTab()
         self.tab_widget.addTab(self.dashboard_tab, "Dashboard")
@@ -113,6 +124,12 @@ class MainWindow(QMainWindow):
             self.watchlist_tab.set_profile_manager(self.profile_manager)
             self.dashboard_tab.set_market_scanner(self.market_scanner)
             self.dashboard_tab.set_profile_manager(self.profile_manager)
+            
+            # Set managers in new ML and Trading tabs
+            self.ml_predictions_tab.set_db_manager(self.db_manager)
+            self.ml_predictions_tab.set_profile_manager(self.profile_manager)
+            self.trading_signals_tab.set_db_manager(self.db_manager)
+            self.trading_signals_tab.set_profile_manager(self.profile_manager)
             
             self.statusBar().showMessage("Managers initialized successfully")
             
@@ -146,6 +163,16 @@ class MainWindow(QMainWindow):
             self.dashboard_tab.activity_logged.connect(self.log_activity)
             self.dashboard_tab.status_updated.connect(self.update_status)
             self.dashboard_tab.quick_scan_requested.connect(self.quick_market_scan)
+        
+        if self.ml_predictions_tab:
+            # ML Predictions tab signals
+            self.ml_predictions_tab.activity_logged.connect(self.log_activity)
+            self.ml_predictions_tab.status_updated.connect(self.update_status)
+        
+        if self.trading_signals_tab:
+            # Trading Signals tab signals
+            self.trading_signals_tab.activity_logged.connect(self.log_activity)
+            self.trading_signals_tab.status_updated.connect(self.update_status)
     
     def on_profile_created(self, user_uid: str):
         """Handle profile creation."""
@@ -167,6 +194,10 @@ class MainWindow(QMainWindow):
             self.watchlist_tab.set_current_user(user_uid)
         if self.dashboard_tab:
             self.dashboard_tab.set_current_user(user_uid)
+        if self.ml_predictions_tab:
+            self.ml_predictions_tab.set_current_user(user_uid)
+        if self.trading_signals_tab:
+            self.trading_signals_tab.set_current_user(user_uid)
     
     def log_activity(self, message: str):
         """Log activity to dashboard."""
