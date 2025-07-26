@@ -214,6 +214,10 @@ venv.bak/
 config/local_config.py
 config/local_settings.py
 
+# GitHub credentials (never commit these)
+config/.github_credentials
+config/github_settings.json
+
 # Test data
 test_data/
 test_*.db
