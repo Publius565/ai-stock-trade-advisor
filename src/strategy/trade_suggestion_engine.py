@@ -22,10 +22,20 @@ class TradeSuggestionEngine:
     
     def __init__(self, prediction_engine: Optional[PredictionEngine] = None,
                  rules_engine: Optional[RulesEngine] = None,
-                 signal_generator: Optional[SignalGenerator] = None):
+                 signal_generator: Optional[SignalGenerator] = None,
+                 db_manager=None, trading_engine=None):
         self.prediction_engine = prediction_engine or PredictionEngine()
         self.rules_engine = rules_engine or RulesEngine()
-        self.signal_generator = signal_generator or SignalGenerator()
+        
+        # Initialize signal_generator with proper dependencies or None if not available
+        if signal_generator:
+            self.signal_generator = signal_generator
+        elif db_manager and trading_engine:
+            self.signal_generator = SignalGenerator(db_manager, trading_engine)
+        else:
+            self.signal_generator = None
+            logger.warning("SignalGenerator not initialized - missing db_manager or trading_engine")
+        
         self.feature_engineer = FeatureEngineer()
         
         # Suggestion categories
@@ -57,7 +67,16 @@ class TradeSuggestionEngine:
             prediction = self.prediction_engine.generate_prediction(symbol, market_data)
             
             # Generate technical signals
-            signals = self.signal_generator.generate_signals(symbol, market_data)
+            signals = []
+            if self.signal_generator:
+                try:
+                    signal = self.signal_generator.generate_signal_for_symbol(symbol)
+                    if signal:
+                        signals = [signal]
+                except Exception as e:
+                    logger.warning(f"Could not generate signals for {symbol}: {e}")
+            else:
+                logger.warning(f"SignalGenerator not available for {symbol}")
             
             # Create feature-based analysis
             features = self._analyze_features(market_data)

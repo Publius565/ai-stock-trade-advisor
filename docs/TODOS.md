@@ -170,7 +170,9 @@ This document tracks all planned features, tasks, and their completion status us
   - [x] Unit tests for core modules (organized by functionality)
   - [x] Integration tests for database layer
   - [x] Profile management tests (✅ FIXED - all 10 tests passing)
-  - [x] Market scanner tests (18/20 passing, 2 minor issues)
+  - [x] Market scanner tests (✅ FIXED - all 10 tests passing)
+- [x] Trading engine tests (✅ FIXED - all 20 tests passing)
+- [x] ML components tests (✅ FIXED - all 27 tests passing, 100% success rate)
   - [x] UI component tests with mocking (needs UI component implementation)
   - [x] Comprehensive test runner with categorization
   - [x] API connection tests and verification
@@ -247,10 +249,12 @@ This document tracks all planned features, tasks, and their completion status us
 
 ### 📋 Next Priority
 1. ✅ **ProfileManager test methods fixed** - All 10 tests passing
-2. ✅ **Phase 3 Trading Engine Complete** - Rule-based expert system and ML components implemented and tested
-3. **Fix 2 minor market scanner test issues** - Cache integration and API failure handling
-4. **Begin Phase 4**: Implement trade execution and tracking system
-5. **Complete Phase 5**: Add interactive charts and visualizations
+2. ✅ **Phase 3 Trading Engine Complete** - Rule-based expert system implemented and tested
+3. ✅ **Phase 3 ML Components Complete** - Machine learning components implemented with 100% test success rate
+4. ✅ **Market Scanner test issues fixed** - Cache integration and API failure handling resolved
+5. ✅ **ML component initialization errors fixed** - TradeSuggestionEngine SignalGenerator dependency issues resolved
+6. **Begin Phase 4**: Implement trade execution and tracking system
+7. **Complete Phase 5**: Add interactive charts and visualizations
 
 ## Notes
 - Priority order: Phase 1-3 are foundational and should be completed first

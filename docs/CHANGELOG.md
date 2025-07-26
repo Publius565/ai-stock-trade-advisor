@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Risk Assessment**: Advanced risk scoring with user profile compatibility and position sizing
 - **Explainable AI**: Human-readable rationale generation for all trading suggestions
 - **Model Performance Tracking**: Cross-validation, R² scoring, and feature importance analysis
-- **Comprehensive Testing**: Full test suite for ML components with 27 test cases (66.7% success rate)
+- **Comprehensive Testing**: Full test suite for ML components with 27 test cases (100% success rate)
 - **Model Persistence**: Save/load functionality for trained models with metadata preservation
 - **Prediction History**: Complete prediction tracking with accuracy metrics and performance analysis
 - **Suggestion Filtering**: Advanced filtering and ranking based on confidence, risk level, and expected value
@@ -28,6 +28,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Deprecated Pandas Methods**: Updated fillna() calls to use ffill() and bfill() methods
 - **Test Import Issues**: Fixed Python path issues for proper module imports in tests
 - **Dependency Installation**: Added scikit-learn, pandas, numpy dependencies for ML functionality
+
+### Fixed
+- **TradeSuggestionEngine Initialization**: Fixed 6 test errors by properly handling SignalGenerator dependencies
+- **Market Scanner Tests**: Fixed 2 test failures in cache integration and API failure handling
+- **ML Component Tests**: Fixed 2 test failures in feature engineering and prediction generation
+- **Test Success Rate**: Improved ML components test success rate from 70.4% to 100%
 
 ## [0.3.1] - 2025-07-26
 

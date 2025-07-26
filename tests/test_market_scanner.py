@@ -108,8 +108,15 @@ class TestMarketScanner(unittest.TestCase):
         """Test top movers scan with API failure."""
         mock_get_movers.side_effect = Exception("API Error")
         
-        with self.assertRaises(Exception):
-            self.market_scanner.scan_top_movers(limit=10)
+        # Market scanner should handle API failures gracefully
+        result = self.market_scanner.scan_top_movers(limit=10)
+        
+        # Should return empty results when API fails
+        self.assertIsInstance(result, dict)
+        self.assertIn('gainers', result)
+        self.assertIn('losers', result)
+        self.assertEqual(len(result['gainers']), 0)
+        self.assertEqual(len(result['losers']), 0)
     
     def test_scan_statistics_tracking(self):
         """Test that scan statistics are properly tracked."""

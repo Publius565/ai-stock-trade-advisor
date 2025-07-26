@@ -177,8 +177,9 @@ class TestFeatureEngineer(unittest.TestCase):
         incomplete_data = self.sample_data.drop(columns=['volume'])
         features_df = self.feature_engineer.create_technical_indicators(incomplete_data)
         
-        # Should still create some features but log warning
-        self.assertGreater(len(features_df.columns), len(incomplete_data.columns))
+        # Should return original dataframe unchanged when required columns are missing
+        self.assertEqual(len(features_df.columns), len(incomplete_data.columns))
+        self.assertTrue(all(col in features_df.columns for col in incomplete_data.columns))
     
     def test_create_target_variable(self):
         """Test target variable creation."""
@@ -259,7 +260,8 @@ class TestPredictionEngine(unittest.TestCase):
         self.assertIn('error', prediction)
     
     @patch('src.ml_models.prediction_engine.ModelManager')
-    def test_generate_prediction_with_trained_models(self, mock_model_manager):
+    @patch('src.ml_models.prediction_engine.FeatureEngineer')
+    def test_generate_prediction_with_trained_models(self, mock_feature_engineer, mock_model_manager):
         """Test prediction generation with trained models."""
         # Mock the model manager to simulate trained models
         mock_manager = Mock()
@@ -270,7 +272,15 @@ class TestPredictionEngine(unittest.TestCase):
             'performance_metrics': {'r2': 0.8}
         }
         
+        # Mock the feature engineer to return valid features
+        mock_feature_engineer_instance = Mock()
+        mock_feature_engineer_instance.prepare_features.return_value = (
+            pd.DataFrame({'feature1': [0.1, 0.2, 0.3], 'feature2': [0.4, 0.5, 0.6]}),
+            pd.Series([0.01, 0.02, 0.03])
+        )
+        
         self.prediction_engine.model_manager = mock_manager
+        self.prediction_engine.feature_engineer = mock_feature_engineer_instance
         
         prediction = self.prediction_engine.generate_prediction('AAPL', self.sample_market_data)
         

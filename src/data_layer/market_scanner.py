@@ -78,6 +78,7 @@ class MarketScanner:
             logger.info(f"Starting top {limit} movers scan")
             
             # Get market movers from API
+            self.stats['api_calls'] += 1
             movers_data = self.api_client.get_market_movers(limit=limit)
             
             if not movers_data:
