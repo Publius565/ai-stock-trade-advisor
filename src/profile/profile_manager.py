@@ -239,13 +239,13 @@ class ProfileManager:
     
     def get_user_watchlists(self, user_uid: str) -> List[Dict[str, Any]]:
         """
-        Get all watchlists for user.
+        Get all watchlists for user with symbols included.
         
         Args:
             user_uid: User UID
             
         Returns:
-            List of watchlist data
+            List of watchlist data with symbols included
         """
         try:
             user_data = self.db.get_user(uid=user_uid)
@@ -253,7 +253,15 @@ class ProfileManager:
                 return []
             
             user_id = user_data['id']
-            return self.db.market_data.get_user_watchlists(user_id)
+            watchlists = self.db.market_data.get_user_watchlists(user_id)
+            
+            # Add symbols to each watchlist
+            for watchlist in watchlists:
+                watchlist_uid = watchlist['uid']
+                symbols = self.db.market_data.get_watchlist_symbols(watchlist_uid)
+                watchlist['symbols'] = symbols
+            
+            return watchlists
         except Exception as e:
             logger.error(f"Failed to get user watchlists: {e}")
             return []

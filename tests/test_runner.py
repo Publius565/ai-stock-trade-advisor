@@ -13,10 +13,10 @@ from pathlib import Path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 # Import all test modules
-from test_profile_management import TestProfileManagement
-from test_market_scanner import TestMarketScanner
-from test_database import TestDatabaseInfrastructure, TestUserManager, TestMarketDataManager
-from test_ui_components import (
+from .test_profile_management import TestProfileManagement
+from .test_market_scanner import TestMarketScanner
+from .test_database import TestDatabaseInfrastructure, TestUserManager, TestMarketDataManager
+from .test_ui_components import (
     TestUIComponentsStructure,
     TestProfileTabLogic,
     TestMarketScannerTabLogic,
