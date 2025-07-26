@@ -1,5 +1,15 @@
 # Project Manifest - AI-Driven Stock Trade Advisor
 
+## Source Code Repository
+
+**GitHub Repository**: [https://github.com/Publius565/ai-stock-trade-advisor](https://github.com/Publius565/ai-stock-trade-advisor)
+
+- **Repository Type**: Private
+- **Branch**: master
+- **Last Updated**: 2025-07-26
+- **Status**: Active Development
+- **Backup Status**: ✅ Fully backed up to GitHub
+
 ## Project Structure Overview
 
 This document provides a comprehensive listing of all folders and files in the AI-Driven Stock Trade Advisor project, along with their purposes and relationships.

@@ -1,6 +1,14 @@
 AI-Driven Stock Trade Advisor - Technical Documentation
 =====================================================
 
+SOURCE CODE REPOSITORY
+---------------------
+GitHub Repository: https://github.com/Publius565/ai-stock-trade-advisor
+Repository Type: Private
+Branch: master
+Last Updated: 2025-07-26
+Status: Active Development
+
 APPLICATION OVERVIEW
 -------------------
 The AI-Driven Stock Trade Advisor is a Windows-based desktop application that provides personalized stock trading recommendations using a combination of rule-based logic and machine learning. The application operates locally for user privacy and connects to public financial APIs for real-time market data.

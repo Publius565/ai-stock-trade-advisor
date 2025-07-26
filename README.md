@@ -2,6 +2,29 @@
 
 A comprehensive Windows-based desktop application that provides personalized stock trading recommendations using a combination of rule-based logic and machine learning.
 
+## 📁 Source Code Repository
+
+**GitHub Repository**: [https://github.com/Publius565/ai-stock-trade-advisor](https://github.com/Publius565/ai-stock-trade-advisor)
+
+- **Repository Type**: Private
+- **Branch**: master
+- **Last Updated**: 2025-07-26
+- **Status**: Active Development
+
+### Repository Structure
+```
+ai-stock-trade-advisor/
+├── config/           # Configuration files and API keys
+├── data/            # Local data storage
+├── docs/            # Project documentation
+├── docker/          # Docker configuration
+├── models/          # ML models and rule configurations
+├── scripts/         # Utility scripts
+├── src/             # Main source code
+├── tests/           # Unit and integration tests
+└── venv/            # Python virtual environment
+```
+
 ## 🚀 Features
 
 - **Personalized Risk Profiling**: Custom risk assessment and investment goal tracking
