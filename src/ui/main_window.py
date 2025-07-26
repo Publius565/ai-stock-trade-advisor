@@ -334,9 +334,43 @@ class MainWindow(QMainWindow):
             
             self.statusBar().showMessage("Database connected successfully")
             self.log_activity("Database initialized successfully")
+            
+            # Try to load default profile
+            self.load_default_profile()
+            
         except Exception as e:
             QMessageBox.critical(self, "Database Error", f"Failed to initialize database: {e}")
             logger.error(f"Database initialization failed: {e}")
+    
+    def load_default_profile(self):
+        """Load default profile if available."""
+        try:
+            # Look for a default user profile
+            users = self.db_manager.users.get_all_users(active_only=True)
+            if users:
+                # Use the first available user
+                default_user = users[0]
+                self.current_user_uid = default_user['uid']
+                
+                # Populate UI with default user data
+                self.username_input.setText(default_user.get('username', ''))
+                self.email_input.setText(default_user.get('email', ''))
+                
+                risk_profile = default_user.get('risk_profile', 'moderate')
+                index = self.risk_profile_combo.findText(risk_profile)
+                if index >= 0:
+                    self.risk_profile_combo.setCurrentIndex(index)
+                
+                self.statusBar().showMessage(f"Loaded default profile: {default_user['username']}")
+                self.log_activity(f"Loaded default profile: {default_user['username']}")
+                self.display_profile_info()
+                
+                logger.info(f"Loaded default profile: {default_user['username']} ({self.current_user_uid})")
+            else:
+                logger.info("No default profile found")
+                
+        except Exception as e:
+            logger.error(f"Failed to load default profile: {e}")
     
     def setup_connections(self):
         """Set up signal connections."""
@@ -479,22 +513,28 @@ class MainWindow(QMainWindow):
         
         try:
             profile_data = self.profile_manager.get_user_profile(self.current_user_uid)
-            if profile_data:
-                info = f"User ID: {profile_data['uid']}\n"
-                info += f"Username: {profile_data.get('username', 'N/A')}\n"
-                info += f"Email: {profile_data.get('email', 'N/A')}\n"
-                info += f"Risk Profile: {profile_data.get('risk_profile', 'N/A')}\n"
-                info += f"Created: {profile_data.get('created_at', 'N/A')}\n"
-                info += f"Updated: {profile_data.get('updated_at', 'N/A')}\n"
+            if profile_data and 'user' in profile_data:
+                user_data = profile_data['user']
+                info = f"User ID: {user_data.get('uid', 'N/A')}\n"
+                info += f"Username: {user_data.get('username', 'N/A')}\n"
+                info += f"Email: {user_data.get('email', 'N/A')}\n"
+                info += f"Risk Profile: {user_data.get('risk_profile', 'N/A')}\n"
+                info += f"Created: {user_data.get('created_at', 'N/A')}\n"
+                info += f"Updated: {user_data.get('updated_at', 'N/A')}\n"
                 
-                # Risk assessment info
-                risk_data = profile_data.get('risk_assessment', {})
-                if risk_data:
-                    info += f"\nRisk Assessment:\n"
-                    info += f"  Timeline: {risk_data.get('investment_timeline', 'N/A')}\n"
-                    info += f"  Tolerance: {risk_data.get('risk_tolerance', 'N/A')}\n"
-                    info += f"  Experience: {risk_data.get('experience', 'N/A')}\n"
-                    info += f"  Goals: {risk_data.get('goals', 'N/A')}\n"
+                # Watchlists info
+                watchlists = profile_data.get('watchlists', [])
+                if watchlists:
+                    info += f"\nWatchlists ({len(watchlists)}):\n"
+                    for watchlist in watchlists:
+                        info += f"  • {watchlist.get('name', 'N/A')}\n"
+                
+                # Preferences info
+                preferences = profile_data.get('preferences', {})
+                if preferences:
+                    info += f"\nPreferences:\n"
+                    for key, value in preferences.items():
+                        info += f"  {key}: {value}\n"
                 
                 self.profile_display.setText(info)
             else:

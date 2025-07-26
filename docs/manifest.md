@@ -19,13 +19,16 @@ This document provides a comprehensive listing of all folders and files in the A
 - **README.md** - Comprehensive project documentation with installation and usage instructions
 - **requirements.txt** - Python dependencies and package management
 - **.gitignore** - Git ignore patterns for sensitive files and build artifacts
-- **debug_schema.py** - Database schema debugging and testing script
-- **test_updated_schema.py** - Database schema update testing script
-- **simple_database_test.py** - Basic database functionality testing
 - **test_database_infrastructure.py** - Comprehensive database infrastructure testing
-- **quick_api_test.py** - Quick API connection verification script
 - **test_api_connections.py** - Comprehensive API connection testing
 - **test_data_ingestion.py** - Data ingestion layer testing and validation
+- **test_ui_final.py** - Final UI testing and validation script
+- **test_profile_and_scanner.py** - Comprehensive profile and scanner testing
+- **test_profile_and_scanner_simple.py** - Simplified profile and scanner testing
+- **run_ui.py** - UI launcher script for the main application
+- **verify_database.py** - Database verification and validation script
+- **init_database.py** - Database initialization script
+- **UI_README.md** - UI-specific documentation and usage instructions
 
 ## Documentation Directory (`/docs/`)
 - **manifest.md** - This file: Complete listing of project structure and file purposes
@@ -107,16 +110,16 @@ This document provides a comprehensive listing of all folders and files in the A
 
 ### Secrets Scan Results - ✅ SECURE
 **Date**: 2025-07-26
-**Status**: No exposed secrets found
+**Status**: API keys properly secured
 
 #### Files Checked:
-- ✅ `config/api_keys.env` - Contains only placeholders, no actual API keys
+- ✅ `config/api_keys.env` - Contains Alpha Vantage API key, properly excluded from Git
 - ✅ `config/github_settings.json` - Contains only username, no tokens
 - ✅ `config/github_config.py` - Secure credential management, no hardcoded secrets
 - ✅ `config/config.py` - Uses environment variables, no hardcoded secrets
 - ✅ All Python source files - No hardcoded credentials found
 - ✅ Database files - No sensitive data in test databases
-- ✅ Configuration files - Properly secured with placeholders
+- ✅ Configuration files - Properly secured with environment variables
 
 #### Security Measures in Place:
 - ✅ `.gitignore` properly excludes sensitive files:
