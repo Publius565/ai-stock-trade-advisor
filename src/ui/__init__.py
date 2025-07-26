@@ -1,9 +1,15 @@
 """
-User Interface Package
+UI Package for AI-Driven Stock Trade Advisor
 
-This package contains all user interface components and GUI elements.
+Provides user interface components for the application.
 """
 
-from . import main_window
-from . import charts
-from . import dashboard 
+__version__ = "0.2.0"
+__author__ = "Apollo"
+
+# Import main UI components
+from .main_window import MainWindow
+
+__all__ = [
+    'MainWindow',
+] 
