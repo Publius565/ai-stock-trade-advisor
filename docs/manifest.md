@@ -64,9 +64,13 @@ This document provides a comprehensive listing of all folders and files in the A
   - **`__init__.py`** - Package initialization
 - **`/src/ui/`** - User interface components (GUI or web-based)
   - **`__init__.py`** - Package initialization
-- **`/src/utils/`** - Utility functions and helpers
-  - **`__init__.py`** - Package initialization
-  - **database_manager.py** - Comprehensive database manager with thread-safe operations
+- **`/src/utils/`** - Utility functions and database management
+  - **`__init__.py`** - Package initialization with all database managers
+  - **base_manager.py** - Abstract base class for database operations
+  - **database_manager.py** - Factory pattern for accessing specialized managers
+  - **user_manager.py** - User profile and authentication management
+  - **market_data_manager.py** - Market data, symbols, and indicators management
+  - **signal_manager.py** - Trading signals and portfolio management
 
 ## Data and Storage Directories
 - **`/data/`** - Local data storage and cache
