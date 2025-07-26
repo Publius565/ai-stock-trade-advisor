@@ -56,12 +56,18 @@ Python Libraries:
 - cryptography (data encryption)
 
 External APIs:
-- Alpha Vantage API (market data)
-- Yahoo Finance (supplementary data)
-- Alpaca Trading API (paper trading)
-- News API (sentiment analysis)
-- Market Scanner APIs (for top movers and market data)
-- Financial News APIs (for business events and world news)
+- Alpha Vantage API (market data) - Optional, requires API key for enhanced features
+- Yahoo Finance (supplementary data) - No API key required, used as primary fallback
+- Alpaca Trading API (paper trading) - Optional, requires API key for trading features
+- News API (sentiment analysis) - Optional, requires API key for news features
+- Market Scanner APIs (for top movers and market data) - Built-in functionality
+- Financial News APIs (for business events and world news) - Built-in functionality
+
+API Key Configuration:
+- Application works without API keys using built-in data sources
+- Alpha Vantage API key recommended for enhanced market data features
+- Yahoo Finance provides comprehensive fallback data without authentication
+- All API keys stored securely in config/api_keys.env (excluded from Git)
 
 ARCHITECTURE COMPONENTS
 ----------------------
