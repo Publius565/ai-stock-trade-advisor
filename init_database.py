@@ -53,18 +53,20 @@ def init_database(db_path: str = "data/trading_advisor.db"):
         # Create data directory if it doesn't exist
         os.makedirs(os.path.dirname(db_path), exist_ok=True)
         
-        # Read schema file - try multiple possible locations
+        # Read schema file - try multiple possible locations with absolute paths
+        script_dir = os.path.dirname(os.path.abspath(__file__))
         schema_files = [
-            "config/optimized_database_schema.sql",
-            "config/database_schema.sql",
-            "optimized_database_schema.sql",
-            "database_schema.sql"
+            os.path.join(script_dir, "config", "optimized_database_schema.sql"),
+            os.path.join(script_dir, "config", "database_schema.sql"),
+            os.path.join(script_dir, "optimized_database_schema.sql"),
+            os.path.join(script_dir, "database_schema.sql")
         ]
         
         schema_file = None
         for file_path in schema_files:
             if os.path.exists(file_path):
                 schema_file = file_path
+                logger.info(f"Found schema file: {schema_file}")
                 break
         
         if not schema_file:

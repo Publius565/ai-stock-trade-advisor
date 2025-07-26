@@ -14,8 +14,11 @@ from typing import Dict, List, Optional, Any
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv('config/api_keys.env')
+# Load environment variables with absolute path
+import os
+script_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+api_keys_path = os.path.join(script_dir, 'config', 'api_keys.env')
+load_dotenv(api_keys_path)
 
 logger = logging.getLogger(__name__)
 
