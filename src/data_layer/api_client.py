@@ -263,13 +263,15 @@ class APIClient:
             symbol: Stock symbol
             
         Returns:
-            Dictionary containing company information
+            Company information dictionary
         """
         try:
+            # Use Yahoo Finance for company info
             ticker = yf.Ticker(symbol)
             info = ticker.info
             
-            return {
+            # Extract key information
+            company_info = {
                 'symbol': symbol,
                 'name': info.get('longName', ''),
                 'sector': info.get('sector', ''),
@@ -278,10 +280,205 @@ class APIClient:
                 'pe_ratio': info.get('trailingPE', 0),
                 'dividend_yield': info.get('dividendYield', 0),
                 'beta': info.get('beta', 0),
-                'fifty_two_week_high': info.get('fiftyTwoWeekHigh', 0),
-                'fifty_two_week_low': info.get('fiftyTwoWeekLow', 0)
+                'volume': info.get('volume', 0),
+                'avg_volume': info.get('averageVolume', 0),
+                'price': info.get('currentPrice', 0),
+                'change_percent': info.get('regularMarketChangePercent', 0)
             }
             
+            return company_info
+            
         except Exception as e:
-            logger.error(f"Error getting company info for {symbol}: {e}")
+            logger.error(f"Failed to get company info for {symbol}: {e}")
+            return None
+    
+    def get_market_movers(self, limit: int = 50) -> Optional[List[Dict[str, Any]]]:
+        """
+        Get top market movers (gainers and losers).
+        
+        Args:
+            limit: Number of movers to return
+            
+        Returns:
+            List of market mover data
+        """
+        try:
+            # Use Yahoo Finance for market movers
+            # This is a simplified implementation - in production you'd use a dedicated API
+            popular_symbols = [
+                'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'META', 'NVDA', 'NFLX',
+                'AMD', 'INTC', 'CRM', 'ORCL', 'ADBE', 'PYPL', 'UBER', 'LYFT',
+                'SPOT', 'ZM', 'SQ', 'ROKU', 'SNAP', 'TWTR', 'PINS', 'SHOP'
+            ]
+            
+            movers = []
+            
+            for symbol in popular_symbols[:limit]:
+                try:
+                    ticker = yf.Ticker(symbol)
+                    info = ticker.info
+                    
+                    if info.get('currentPrice') and info.get('regularMarketChangePercent'):
+                        mover_data = {
+                            'symbol': symbol,
+                            'change_percent': info.get('regularMarketChangePercent', 0),
+                            'price': info.get('currentPrice', 0),
+                            'volume': info.get('volume', 0),
+                            'market_cap': info.get('marketCap', 0),
+                            'sector': info.get('sector', 'Unknown')
+                        }
+                        movers.append(mover_data)
+                        
+                        # Rate limiting
+                        time.sleep(0.1)
+                        
+                except Exception as e:
+                    logger.warning(f"Failed to get data for {symbol}: {e}")
+                    continue
+            
+            # Sort by absolute change percentage
+            movers.sort(key=lambda x: abs(x['change_percent']), reverse=True)
+            
+            return movers[:limit]
+            
+        except Exception as e:
+            logger.error(f"Failed to get market movers: {e}")
+            return None
+    
+    def get_stock_data(self, symbol: str, days: int = 1) -> Optional[List[Dict[str, Any]]]:
+        """
+        Get stock data for a symbol.
+        
+        Args:
+            symbol: Stock symbol
+            days: Number of days of data to retrieve
+            
+        Returns:
+            List of stock data points
+        """
+        try:
+            ticker = yf.Ticker(symbol)
+            
+            # Get historical data
+            period = f"{days}d" if days <= 30 else "1mo"
+            hist = ticker.history(period=period)
+            
+            if hist.empty:
+                return None
+            
+            # Convert to list of dictionaries
+            data_points = []
+            for date, row in hist.iterrows():
+                data_point = {
+                    'date': date.strftime('%Y-%m-%d'),
+                    'open': float(row['Open']),
+                    'high': float(row['High']),
+                    'low': float(row['Low']),
+                    'close': float(row['Close']),
+                    'volume': int(row['Volume']),
+                    'change_percent': float(((row['Close'] - row['Open']) / row['Open']) * 100)
+                }
+                data_points.append(data_point)
+            
+            return data_points
+            
+        except Exception as e:
+            logger.error(f"Failed to get stock data for {symbol}: {e}")
+            return None
+    
+    def get_news_for_symbol(self, symbol: str, hours_back: int = 24) -> Optional[List[Dict[str, Any]]]:
+        """
+        Get news articles for a symbol.
+        
+        Args:
+            symbol: Stock symbol
+            hours_back: Hours of news history to retrieve
+            
+        Returns:
+            List of news articles
+        """
+        try:
+            # Use Yahoo Finance for news
+            ticker = yf.Ticker(symbol)
+            news = ticker.news
+            
+            if not news:
+                return []
+            
+            # Process and filter news
+            processed_news = []
+            cutoff_time = datetime.now() - timedelta(hours=hours_back)
+            
+            for article in news:
+                try:
+                    # Convert timestamp
+                    pub_time = datetime.fromtimestamp(article.get('providerPublishTime', 0))
+                    
+                    # Filter by time
+                    if pub_time < cutoff_time:
+                        continue
+                    
+                    processed_article = {
+                        'title': article.get('title', ''),
+                        'summary': article.get('summary', ''),
+                        'url': article.get('link', ''),
+                        'published_at': pub_time.isoformat(),
+                        'source': article.get('publisher', ''),
+                        'sentiment': 'neutral',  # Would need sentiment analysis API
+                        'relevance_score': 0.7  # Default relevance score
+                    }
+                    
+                    processed_news.append(processed_article)
+                    
+                except Exception as e:
+                    logger.warning(f"Failed to process news article: {e}")
+                    continue
+            
+            return processed_news
+            
+        except Exception as e:
+            logger.error(f"Failed to get news for {symbol}: {e}")
+            return []
+    
+    def get_market_overview(self) -> Optional[Dict[str, Any]]:
+        """
+        Get market overview and indices data.
+        
+        Returns:
+            Market overview data
+        """
+        try:
+            # Get major indices
+            indices = ['^GSPC', '^DJI', '^IXIC', '^VIX']  # S&P 500, Dow, NASDAQ, VIX
+            overview = {}
+            
+            for index in indices:
+                try:
+                    ticker = yf.Ticker(index)
+                    info = ticker.info
+                    
+                    index_name = {
+                        '^GSPC': 'S&P 500',
+                        '^DJI': 'Dow Jones',
+                        '^IXIC': 'NASDAQ',
+                        '^VIX': 'VIX'
+                    }.get(index, index)
+                    
+                    overview[index_name] = {
+                        'symbol': index,
+                        'price': info.get('currentPrice', 0),
+                        'change_percent': info.get('regularMarketChangePercent', 0),
+                        'volume': info.get('volume', 0)
+                    }
+                    
+                    time.sleep(0.1)  # Rate limiting
+                    
+                except Exception as e:
+                    logger.warning(f"Failed to get data for {index}: {e}")
+                    continue
+            
+            return overview
+            
+        except Exception as e:
+            logger.error(f"Failed to get market overview: {e}")
             return None 

@@ -1,19 +1,21 @@
 """
-Data Layer Module for AI-Driven Stock Trade Advisor
+Data Layer Package
 
-This module handles all data ingestion, caching, and management operations.
+This package handles data ingestion, API integration, and market data management.
 """
 
 from .api_client import APIClient
 from .data_cache import DataCache
-from .market_data import MarketDataManager
 from .data_validator import DataValidator
+from .market_data import MarketDataManager
 from .streaming_data import StreamingDataManager
+from .market_scanner import MarketScanner
 
 __all__ = [
     'APIClient',
     'DataCache', 
-    'MarketDataManager',
     'DataValidator',
-    'StreamingDataManager'
+    'MarketDataManager',
+    'StreamingDataManager',
+    'MarketScanner'
 ] 

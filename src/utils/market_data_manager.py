@@ -298,27 +298,22 @@ class MarketDataManager(BaseDatabaseManager):
     
     def get_symbol_statistics(self) -> Dict[str, Any]:
         """
-        Get symbol and market data statistics.
+        Get symbol statistics.
         
         Returns:
-            Dictionary with statistics
+            Dictionary with symbol statistics
         """
         stats = {}
         
         # Total symbols
-        total_query = "SELECT COUNT(*) as total FROM symbols WHERE is_active = 1"
+        total_query = "SELECT COUNT(*) as total FROM symbols"
         total_result = self.execute_query(total_query)
         stats['total_symbols'] = total_result[0]['total'] if total_result else 0
         
-        # Market data points count
-        data_query = "SELECT COUNT(*) as total FROM market_data"
-        data_result = self.execute_query(data_query)
-        stats['market_data_points'] = data_result[0]['total'] if data_result else 0
-        
-        # Indicators count
-        indicators_query = "SELECT COUNT(*) as total FROM indicators"
-        indicators_result = self.execute_query(indicators_query)
-        stats['indicator_points'] = indicators_result[0]['total'] if indicators_result else 0
+        # Active symbols
+        active_query = "SELECT COUNT(*) as active FROM symbols WHERE is_active = 1"
+        active_result = self.execute_query(active_query)
+        stats['active_symbols'] = active_result[0]['active'] if active_result else 0
         
         # Sector distribution
         sector_query = """
@@ -331,4 +326,276 @@ class MarketDataManager(BaseDatabaseManager):
         sector_results = self.execute_query(sector_query)
         stats['sector_distribution'] = {row['sector']: row['count'] for row in sector_results}
         
-        return stats 
+        return stats
+    
+    # ============================================================================
+    # WATCHLIST MANAGEMENT
+    # ============================================================================
+    
+    def create_watchlist(self, user_id: int, name: str, 
+                        description: str = None, is_default: bool = False) -> Optional[str]:
+        """
+        Create a new watchlist for user.
+        
+        Args:
+            user_id: User ID
+            name: Watchlist name
+            description: Watchlist description
+            is_default: Whether this is the default watchlist
+            
+        Returns:
+            Watchlist UID if successful, None otherwise
+        """
+        uid = self.generate_uid('wl')
+        
+        # Get next available ID
+        id_query = "SELECT COALESCE(MAX(id), 0) + 1 as next_id FROM watchlists"
+        id_result = self.execute_query(id_query)
+        next_id = id_result[0]['next_id'] if id_result else 1
+        
+        query = """
+        INSERT INTO watchlists (uid, id, user_id, name, description, is_default)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """
+        
+        try:
+            self.execute_update(query, (uid, next_id, user_id, name, description, is_default))
+            logger.info(f"Created watchlist: {name} ({uid})")
+            return uid
+        except Exception as e:
+            logger.error(f"Failed to create watchlist {name}: {e}")
+            return None
+    
+    def add_symbol_to_watchlist(self, watchlist_uid: str, symbol_uid: str, 
+                               priority: int = 0, notes: str = None) -> bool:
+        """
+        Add symbol to watchlist.
+        
+        Args:
+            watchlist_uid: Watchlist UID
+            symbol_uid: Symbol UID
+            priority: User-defined priority (0-10)
+            notes: User notes about symbol
+            
+        Returns:
+            True if successful
+        """
+        # Get watchlist and symbol IDs
+        watchlist_query = "SELECT id FROM watchlists WHERE uid = ?"
+        watchlist_result = self.execute_query(watchlist_query, (watchlist_uid,))
+        if not watchlist_result:
+            return False
+        watchlist_id = watchlist_result[0]['id']
+        
+        symbol_query = "SELECT id FROM symbols WHERE uid = ?"
+        symbol_result = self.execute_query(symbol_query, (symbol_uid,))
+        if not symbol_result:
+            return False
+        symbol_id = symbol_result[0]['id']
+        
+        # Create watchlist symbol entry
+        uid = self.generate_uid('wls')
+        
+        # Get next available ID
+        id_query = "SELECT COALESCE(MAX(id), 0) + 1 as next_id FROM watchlist_symbols"
+        id_result = self.execute_query(id_query)
+        next_id = id_result[0]['next_id'] if id_result else 1
+        
+        query = """
+        INSERT INTO watchlist_symbols (uid, id, watchlist_id, symbol_id, priority, notes)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """
+        
+        try:
+            self.execute_update(query, (uid, next_id, watchlist_id, symbol_id, priority, notes))
+            logger.info(f"Added symbol to watchlist: {watchlist_uid}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to add symbol to watchlist: {e}")
+            return False
+    
+    def get_user_watchlists(self, user_id: int) -> List[Dict[str, Any]]:
+        """
+        Get all watchlists for user.
+        
+        Args:
+            user_id: User ID
+            
+        Returns:
+            List of watchlist data
+        """
+        query = """
+        SELECT w.*, COUNT(ws.id) as symbol_count
+        FROM watchlists w
+        LEFT JOIN watchlist_symbols ws ON w.id = ws.watchlist_id
+        WHERE w.user_id = ? AND w.is_active = 1
+        GROUP BY w.id
+        ORDER BY w.is_default DESC, w.created_at DESC
+        """
+        
+        return self.execute_query(query, (user_id,))
+    
+    def get_watchlist_symbols(self, watchlist_uid: str) -> List[Dict[str, Any]]:
+        """
+        Get all symbols in a watchlist.
+        
+        Args:
+            watchlist_uid: Watchlist UID
+            
+        Returns:
+            List of symbol data with watchlist metadata
+        """
+        query = """
+        SELECT s.*, ws.priority, ws.notes, ws.added_at
+        FROM watchlist_symbols ws
+        JOIN symbols s ON ws.symbol_id = s.id
+        JOIN watchlists w ON ws.watchlist_id = w.id
+        WHERE w.uid = ?
+        ORDER BY ws.priority DESC, s.symbol
+        """
+        
+        return self.execute_query(query, (watchlist_uid,))
+    
+    def remove_symbol_from_watchlist(self, watchlist_uid: str, symbol_uid: str) -> bool:
+        """
+        Remove symbol from watchlist.
+        
+        Args:
+            watchlist_uid: Watchlist UID
+            symbol_uid: Symbol UID
+            
+        Returns:
+            True if successful
+        """
+        query = """
+        DELETE FROM watchlist_symbols 
+        WHERE watchlist_id = (SELECT id FROM watchlists WHERE uid = ?)
+        AND symbol_id = (SELECT id FROM symbols WHERE uid = ?)
+        """
+        
+        return self.execute_update(query, (watchlist_uid, symbol_uid)) > 0
+    
+    def delete_watchlist(self, watchlist_uid: str) -> bool:
+        """
+        Delete a watchlist and all its symbols.
+        
+        Args:
+            watchlist_uid: Watchlist UID
+            
+        Returns:
+            True if successful
+        """
+        # First delete all symbols in the watchlist
+        symbol_delete_query = """
+        DELETE FROM watchlist_symbols 
+        WHERE watchlist_id = (SELECT id FROM watchlists WHERE uid = ?)
+        """
+        self.execute_update(symbol_delete_query, (watchlist_uid,))
+        
+        # Then delete the watchlist
+        watchlist_delete_query = "DELETE FROM watchlists WHERE uid = ?"
+        return self.execute_update(watchlist_delete_query, (watchlist_uid,)) > 0
+    
+    # ============================================================================
+    # NEWS AND MARKET MOVERS
+    # ============================================================================
+    
+    def store_market_mover(self, symbol_uid: str, change_percent: float, 
+                          volume: int = None, price: float = None,
+                          market_cap: float = None, sector: str = None) -> bool:
+        """
+        Store market mover data.
+        
+        Args:
+            symbol_uid: Symbol UID
+            change_percent: Percentage change
+            volume: Trading volume
+            price: Current price
+            market_cap: Market capitalization
+            sector: Industry sector
+            
+        Returns:
+            True if successful
+        """
+        # Get symbol ID
+        symbol_query = "SELECT id FROM symbols WHERE uid = ?"
+        symbol_result = self.execute_query(symbol_query, (symbol_uid,))
+        if not symbol_result:
+            return False
+        symbol_id = symbol_result[0]['id']
+        
+        # Store market mover data
+        uid = self.generate_uid('mm')
+        
+        # Get next available ID
+        id_query = "SELECT COALESCE(MAX(id), 0) + 1 as next_id FROM market_movers"
+        id_result = self.execute_query(id_query)
+        next_id = id_result[0]['next_id'] if id_result else 1
+        
+        # Determine mover type based on change percentage
+        mover_type = 'gainer' if change_percent > 0 else 'loser'
+        
+        # Calculate price change (simplified)
+        price_change = change_percent * (price or 100) / 100 if price else 0
+        
+        query = """
+        INSERT INTO market_movers (uid, id, symbol_id, date, change_percent, 
+                                  price_change, mover_type, created_at)
+        VALUES (?, ?, ?, unixepoch(), ?, ?, ?, unixepoch())
+        """
+        
+        try:
+            self.execute_update(query, (uid, next_id, symbol_id, change_percent, 
+                                       price_change, mover_type))
+            return True
+        except Exception as e:
+            logger.error(f"Failed to store market mover: {e}")
+            return False
+    
+    def store_news_article(self, symbol_uid: str, title: str, summary: str,
+                          url: str, published_at: str, source: str,
+                          sentiment: str = 'neutral', relevance_score: float = 0.5) -> bool:
+        """
+        Store news article data.
+        
+        Args:
+            symbol_uid: Symbol UID
+            title: Article title
+            summary: Article summary
+            url: Article URL
+            published_at: Publication timestamp
+            source: News source
+            sentiment: Sentiment analysis result
+            relevance_score: Relevance score (0-1)
+            
+        Returns:
+            True if successful
+        """
+        # Get symbol ID
+        symbol_query = "SELECT id FROM symbols WHERE uid = ?"
+        symbol_result = self.execute_query(symbol_query, (symbol_uid,))
+        if not symbol_result:
+            return False
+        symbol_id = symbol_result[0]['id']
+        
+        # Store news article
+        uid = self.generate_uid('news')
+        
+        # Get next available ID
+        id_query = "SELECT COALESCE(MAX(id), 0) + 1 as next_id FROM news_articles"
+        id_result = self.execute_query(id_query)
+        next_id = id_result[0]['next_id'] if id_result else 1
+        
+        query = """
+        INSERT INTO news_articles (uid, id, symbol_id, title, summary, url, 
+                                  published_at, source, sentiment, relevance_score)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """
+        
+        try:
+            self.execute_update(query, (uid, next_id, symbol_id, title, summary, url,
+                                       published_at, source, sentiment, relevance_score))
+            return True
+        except Exception as e:
+            logger.error(f"Failed to store news article: {e}")
+            return False 
