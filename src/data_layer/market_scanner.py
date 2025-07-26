@@ -154,12 +154,16 @@ class MarketScanner:
             True if successful
         """
         try:
+            # Verify database schema before proceeding
+            self._verify_database_schema()
+            
             for mover in movers:
                 symbol = mover['symbol']
                 
                 # Get or create symbol
                 symbol_uid = self.db.get_or_create_symbol(symbol)
                 if not symbol_uid:
+                    logger.warning(f"Failed to get or create symbol: {symbol}")
                     continue
                 
                 # Store market mover data
@@ -175,7 +179,41 @@ class MarketScanner:
             return True
         except Exception as e:
             logger.error(f"Failed to store market movers: {e}")
+            # Log additional context for debugging
+            logger.error(f"Database path: {self.db.db_path}")
+            logger.error(f"Number of movers: {len(movers) if movers else 0}")
             return False
+    
+    def _verify_database_schema(self):
+        """Verify that the database schema is properly initialized."""
+        try:
+            # Check if the symbols table exists
+            query = "SELECT name FROM sqlite_master WHERE type='table' AND name='symbols'"
+            result = self.db.market_data.execute_query(query)
+            
+            if not result:
+                logger.warning("Symbols table not found, attempting to reinitialize database schema")
+                
+                # Try to reinitialize the schema using MarketDataManager
+                from src.utils.market_data_manager import MarketDataManager
+                market_manager = MarketDataManager(str(self.db.db_path))
+                
+                # Force schema initialization
+                market_manager._ensure_database_exists()
+                market_manager.close()
+                
+                # Verify again
+                result = self.db.market_data.execute_query(query)
+                if not result:
+                    raise Exception("Failed to initialize symbols table after reinitialization attempt")
+                else:
+                    logger.info("Database schema reinitialized successfully")
+            else:
+                logger.debug("Database schema verified successfully")
+                
+        except Exception as e:
+            logger.error(f"Database schema verification failed: {e}")
+            raise
     
     def scan_user_watchlists(self, user_uid: str) -> Dict[str, Any]:
         """
@@ -305,10 +343,14 @@ class MarketScanner:
             True if successful
         """
         try:
+            # Verify database schema before proceeding
+            self._verify_database_schema()
+            
             for symbol, articles in news_data.items():
                 # Get symbol UID
                 symbol_uid = self.db.get_or_create_symbol(symbol)
                 if not symbol_uid:
+                    logger.warning(f"Failed to get or create symbol for news: {symbol}")
                     continue
                 
                 for article in articles:
@@ -327,9 +369,12 @@ class MarketScanner:
             return True
         except Exception as e:
             logger.error(f"Failed to store news data: {e}")
+            # Log additional context for debugging
+            logger.error(f"Database path: {self.db.db_path}")
+            logger.error(f"Number of symbols with news: {len(news_data) if news_data else 0}")
             return False
     
-    def get_intelligent_symbols(self, user_uid: str, limit: int = 20) -> List[Dict[str, Any]]:
+    def get_intelligent_symbols(self, user_uid: str, limit: int = 20) -> Dict[str, Any]:
         """
         Get intelligent symbol suggestions based on user preferences.
         
@@ -338,13 +383,15 @@ class MarketScanner:
             limit: Maximum number of symbols to return
             
         Returns:
-            List of suggested symbols with reasoning
+            Dictionary with 'suggestions' list and metadata
         """
         try:
+            start_time = time.time()
+            
             # Get user profile and preferences
             user_data = self.db.get_user(uid=user_uid)
             if not user_data:
-                return []
+                return {'suggestions': [], 'scan_metadata': {}}
             
             risk_profile = user_data.get('risk_profile', 'moderate')
             
@@ -378,11 +425,28 @@ class MarketScanner:
             filtered_symbols.sort(key=lambda x: abs(x['change_percent']), reverse=True)
             filtered_symbols = filtered_symbols[:limit]
             
-            return filtered_symbols
+            # Update statistics
+            scan_duration = time.time() - start_time
+            self.stats['scans_completed'] += 1
+            self.stats['symbols_scanned'] += len(filtered_symbols)
+            self.stats['last_scan'] = datetime.now()
+            self.stats['scan_duration'] = scan_duration
+            
+            logger.info(f"Intelligent symbols scan completed: {len(filtered_symbols)} suggestions in {scan_duration:.2f}s")
+            
+            return {
+                'suggestions': filtered_symbols,
+                'scan_metadata': {
+                    'timestamp': datetime.now().isoformat(),
+                    'duration': scan_duration,
+                    'total_symbols': len(filtered_symbols),
+                    'user_risk_profile': risk_profile
+                }
+            }
             
         except Exception as e:
             logger.error(f"Failed to get intelligent symbols: {e}")
-            return []
+            return {'suggestions': [], 'scan_metadata': {}}
     
     def _is_symbol_suitable_for_risk(self, symbol_data: Dict[str, Any], risk_profile: str) -> bool:
         """

@@ -70,12 +70,12 @@ class BaseDatabaseManager(ABC):
     
     def _ensure_database_exists(self):
         """Ensure database schema exists."""
-        # Try multiple possible schema file locations
+        # Try multiple possible schema file locations, prioritize optimized schema
         script_dir = Path(__file__).parent.parent.parent
         schema_paths = [
             script_dir / "config" / "optimized_database_schema.sql",
-            script_dir / "config" / "database_schema.sql",
             Path("config/optimized_database_schema.sql"),
+            script_dir / "config" / "database_schema.sql",
             Path("config/database_schema.sql")
         ]
         
@@ -83,14 +83,15 @@ class BaseDatabaseManager(ABC):
         for path in schema_paths:
             if path.exists():
                 schema_path = path
+                logger.info(f"Found schema file: {schema_path}")
                 break
         
         if schema_path and schema_path.exists():
             with self._lock:
                 conn = self._get_connection()
                 
-                # Check if tables exist first
-                check_query = "SELECT name FROM sqlite_master WHERE type='table' AND name='users'"
+                # Check if symbols table exists (from optimized schema)
+                check_query = "SELECT name FROM sqlite_master WHERE type='table' AND name='symbols'"
                 cursor = conn.execute(check_query)
                 tables_exist = cursor.fetchone() is not None
                 
@@ -102,6 +103,8 @@ class BaseDatabaseManager(ABC):
                     conn.executescript(schema_sql)
                     conn.commit()
                     logger.info(f"Database schema initialized from {schema_path}")
+                else:
+                    logger.debug("Database schema already exists")
         else:
             logger.warning(f"Schema file not found in any of these locations: {schema_paths}")
     
@@ -132,7 +135,8 @@ class BaseDatabaseManager(ABC):
         with self._lock:
             conn = self._get_connection()
             cursor = conn.execute(query, params)
-            return [dict(row) for row in cursor.fetchall()]
+            columns = [description[0] for description in cursor.description]
+            return [dict(zip(columns, row)) for row in cursor.fetchall()]
     
     def execute_update(self, query: str, params: tuple = ()) -> int:
         """

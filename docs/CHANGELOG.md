@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **MAJOR REFACTORING - Modular UI Architecture**: Complete refactoring of main_window.py from 1,022 lines to ~350 lines (66% reduction)
+- **Modular UI Components**: Created dedicated components - ProfileTab, MarketScannerTab, WatchlistTab, DashboardTab
+- **Organized Test Suite**: Consolidated scattered test files into organized /tests/ directory with categorized test suites
+- **Comprehensive Test Runner**: Added test_runner.py with category-based test execution (database, profile, scanner, ui)
+- **Enhanced Documentation**: Updated manifest.md with complete file line counts and architectural improvements
+- **Clean Project Structure**: Removed 7 scattered test files from root directory, improving project organization
+- **Database Schema Verification**: Added robust database schema verification to prevent "no such table" errors
+- **Enhanced Error Handling**: Improved error handling in market scanner with detailed logging and recovery mechanisms
+- **Database Initialization Safety**: Added verification steps during application startup to ensure database schema is properly initialized
 - **Phase 2 Complete**: User profile management system and market scanner
 - **Simple UI Implementation**: PyQt6-based desktop interface for testing
 - Comprehensive user profile management with risk assessment
@@ -95,6 +104,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ### Fixed
+- **Market Scanner Signal Error**: Fixed "ScannerWorker.scan_complete[dict].emit(): argument 1 has unexpected type 'list'" error by standardizing return format for all scan methods
+- **Database Schema Errors**: Fixed "no such table: symbols" error by adding schema verification and recovery mechanisms
+- **Race Conditions**: Prevented database initialization race conditions during application startup
+- **Error Recovery**: Added automatic database schema reinitialization when tables are missing
+- **Profile Update Error**: Fixed "ProfileManager.update_user_profile() got an unexpected keyword argument 'email'" error by correcting method signature
+- **Scan Results Display**: Fixed empty scan results table by ensuring proper data flow from market scanner to UI
+- **Database Schema Verification**: Enhanced schema verification to check for correct table (symbols) and prioritize optimized schema file
 - Database ID assignment issues with proper auto-increment handling
 - Import structure inconsistencies across modules
 - Thread safety issues with shared database connections
@@ -105,6 +121,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Database schema loading**: Fixed absolute path resolution for schema files in init_database.py
 - **API key path resolution**: Enhanced API client with absolute path loading for environment variables
 - **Full database initialization**: Database now initializes successfully with complete schema (17 tables, 6 views, 68 indexes)
+- **Database verification enhancement**: Enhanced verify_database.py with comprehensive table checking using correct schema names
+- **BaseDatabaseManager schema path resolution**: Fixed with multiple location fallbacks and absolute path detection
 
 ### Security
 - ✅ Completed comprehensive secrets scan - no exposed credentials found

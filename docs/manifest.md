@@ -15,19 +15,13 @@
 This document provides a comprehensive listing of all folders and files in the AI-Driven Stock Trade Advisor project, along with their purposes and relationships.
 
 ## Root Directory Files
-- **main.py** - Main application entry point orchestrating all system components
+- **main.py** - Main application entry point orchestrating all system components (60 lines)
 - **README.md** - Comprehensive project documentation with installation and usage instructions
 - **requirements.txt** - Python dependencies and package management
 - **.gitignore** - Git ignore patterns for sensitive files and build artifacts
-- **test_database_infrastructure.py** - Comprehensive database infrastructure testing
-- **test_api_connections.py** - Comprehensive API connection testing
-- **test_data_ingestion.py** - Data ingestion layer testing and validation
-- **test_ui_final.py** - Final UI testing and validation script
-- **test_profile_and_scanner.py** - Comprehensive profile and scanner testing
-- **test_profile_and_scanner_simple.py** - Simplified profile and scanner testing
-- **run_ui.py** - UI launcher script for the main application
-- **verify_database.py** - Database verification and validation script
-- **init_database.py** - Database initialization script
+- **run_ui.py** - UI launcher script for the main application (186 lines)
+- **verify_database.py** - Database verification and validation script (110 lines)
+- **init_database.py** - Database initialization script (175 lines)
 - **UI_README.md** - UI-specific documentation and usage instructions
 
 ## Documentation Directory (`/docs/`)
@@ -52,28 +46,37 @@ This document provides a comprehensive listing of all folders and files in the A
 - **`/src/__init__.py`** - Package initialization file
 - **`/src/data_layer/`** - Data ingestion and API integration modules
   - **`__init__.py`** - Package initialization
-  - **api_client.py** - API client for external financial data providers
-  - **data_cache.py** - Intelligent data caching system
-  - **data_validator.py** - Data validation and quality assurance
-  - **market_data.py** - Market data management and processing
-  - **streaming_data.py** - Real-time data streaming capabilities
+  - **api_client.py** - API client for external financial data providers (483 lines)
+  - **data_cache.py** - Intelligent data caching system (302 lines)
+  - **data_validator.py** - Data validation and quality assurance (388 lines)
+  - **market_data.py** - Market data management and processing (325 lines)
+  - **market_scanner.py** - Market scanning and top movers analysis (582 lines)
+  - **streaming_data.py** - Real-time data streaming capabilities (385 lines)
 - **`/src/profile/`** - User profile and risk management modules
   - **`__init__.py`** - Package initialization
+  - **profile_manager.py** - User profile and risk management (476 lines)
 - **`/src/strategy/`** - Trade suggestion engine and rule-based systems
   - **`__init__.py`** - Package initialization
 - **`/src/execution/`** - Trade execution and tracking modules
   - **`__init__.py`** - Package initialization
 - **`/src/ml_models/`** - Machine learning and AI components
   - **`__init__.py`** - Package initialization
-- **`/src/ui/`** - User interface components (GUI or web-based)
+- **`/src/ui/`** - User interface components (REFACTORED - Modular Architecture)
   - **`__init__.py`** - Package initialization
+  - **main_window.py** - Main application orchestrator (~350 lines, reduced from 1022)
+  - **`/src/ui/components/`** - Modular UI components
+    - **`__init__.py`** - Components package initialization
+    - **profile_tab.py** - User profile management component
+    - **market_scanner_tab.py** - Market scanning interface component
+    - **watchlist_tab.py** - Watchlist management component
+    - **dashboard_tab.py** - Statistics and activity dashboard component
 - **`/src/utils/`** - Utility functions and database management
   - **`__init__.py`** - Package initialization with all database managers
-  - **base_manager.py** - Abstract base class for database operations
+  - **base_manager.py** - Abstract base class for database operations (198 lines)
   - **database_manager.py** - Factory pattern for accessing specialized managers
   - **user_manager.py** - User profile and authentication management
-  - **market_data_manager.py** - Market data, symbols, and indicators management
-  - **signal_manager.py** - Trading signals and portfolio management
+  - **market_data_manager.py** - Market data, symbols, and indicators management (596 lines)
+  - **signal_manager.py** - Trading signals and portfolio management (382 lines)
 
 ## Data and Storage Directories
 - **`/data/`** - Local data storage and cache
@@ -87,7 +90,13 @@ This document provides a comprehensive listing of all folders and files in the A
 - **`/logs/`** - Application logs and debugging information (empty, ready for use)
 
 ## Development and Testing
-- **`/tests/`** - Unit tests and integration tests (empty, ready for use)
+- **`/tests/`** - Organized unit tests and integration tests
+  - **`__init__.py`** - Test package initialization
+  - **test_profile_management.py** - Comprehensive profile management tests
+  - **test_market_scanner.py** - Market scanner functionality tests
+  - **test_database.py** - Database infrastructure and manager tests
+  - **test_ui_components.py** - Modular UI component tests
+  - **test_runner.py** - Comprehensive test runner with categorization
 - **`/scripts/`** - Utility scripts for setup, deployment, and maintenance
   - **init_database.py** - Database initialization script with verification
   - **github_setup.py** - GitHub repository setup and configuration
