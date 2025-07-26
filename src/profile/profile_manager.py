@@ -118,6 +118,19 @@ class ProfileManager:
             logger.error(f"Failed to update risk profile: {e}")
             return False
     
+    def update_risk_assessment(self, user_uid: str, risk_assessment: Dict[str, Any]) -> bool:
+        """
+        Update user risk assessment (alias for update_risk_profile).
+        
+        Args:
+            user_uid: User UID
+            risk_assessment: Risk assessment data
+            
+        Returns:
+            True if successful
+        """
+        return self.update_risk_profile(user_uid, risk_assessment)
+    
     def _calculate_risk_score(self, assessment: Dict[str, Any]) -> int:
         """
         Calculate risk score from assessment answers.
@@ -140,15 +153,15 @@ class ProfileManager:
         tolerance_scores = {'low': 20, 'medium': 50, 'high': 80}
         score += tolerance_scores.get(tolerance, 50)
         
-        # Investment experience
-        experience = assessment.get('experience', 'medium')
-        experience_scores = {'beginner': 30, 'medium': 50, 'expert': 70}
+        # Investment experience (handle both 'experience' and 'experience_level')
+        experience = assessment.get('experience_level', assessment.get('experience', 'medium'))
+        experience_scores = {'beginner': 30, 'intermediate': 50, 'expert': 70}
         score += experience_scores.get(experience, 50)
         
-        # Financial goals
-        goals = assessment.get('goals', 'growth')
-        goal_scores = {'income': 30, 'growth': 60, 'aggressive': 80}
-        score += goal_scores.get(goals, 60)
+        # Financial goals (handle both 'goals' and 'investment_goals')
+        goals = assessment.get('investment_goals', assessment.get('goals', 'balanced'))
+        goal_scores = {'conservative': 30, 'balanced': 50, 'aggressive': 80}
+        score += goal_scores.get(goals, 50)
         
         return min(score, 100)
     

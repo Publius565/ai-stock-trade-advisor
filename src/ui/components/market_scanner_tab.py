@@ -142,9 +142,29 @@ class MarketScannerTab(QWidget):
                 self.scanner_worker = ScannerWorker(
                     self.market_scanner, "top_movers", limit=limit
                 )
-            else:  # Intelligent Suggestions
+            elif scan_type == "User Watchlists":
+                # Get current user UID from parent window
+                parent_window = self.window()
+                user_uid = getattr(parent_window, 'current_user_uid', None)
+                if not user_uid:
+                    QMessageBox.warning(self, "Warning", "No user profile loaded. Please create or load a profile first.")
+                    self.reset_scan_ui()
+                    return
+                
                 self.scanner_worker = ScannerWorker(
-                    self.market_scanner, "intelligent", limit=limit
+                    self.market_scanner, "watchlist", user_uid=user_uid, limit=limit
+                )
+            else:  # Intelligent Suggestions
+                # Get current user UID from parent window
+                parent_window = self.window()
+                user_uid = getattr(parent_window, 'current_user_uid', None)
+                if not user_uid:
+                    QMessageBox.warning(self, "Warning", "No user profile loaded. Please create or load a profile first.")
+                    self.reset_scan_ui()
+                    return
+                
+                self.scanner_worker = ScannerWorker(
+                    self.market_scanner, "intelligent", user_uid=user_uid, limit=limit
                 )
             
             # Connect worker signals

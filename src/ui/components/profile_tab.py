@@ -174,12 +174,13 @@ class ProfileTab(QWidget):
                 return
             
             # Load user profile
-            profile = self.profile_manager.get_user_profile(username=username)
+            profile = self.profile_manager.get_user_profile_by_username(username=username)
             
-            if profile:
-                self.current_user_uid = profile['uid']
-                self.email_input.setText(profile['email'])
-                self.risk_profile_combo.setCurrentText(profile['risk_profile'])
+            if profile and 'user' in profile:
+                user_data = profile['user']
+                self.current_user_uid = user_data['uid']
+                self.email_input.setText(user_data.get('email', ''))
+                self.risk_profile_combo.setCurrentText(user_data.get('risk_profile', 'moderate'))
                 
                 QMessageBox.information(self, "Success", f"Profile loaded successfully!")
                 self.activity_logged.emit(f"Loaded profile for {username}")
@@ -209,11 +210,15 @@ class ProfileTab(QWidget):
                 return
             
             # Update profile
+            profile_data = {
+                'username': username,
+                'email': email,
+                'risk_profile': risk_profile
+            }
+            
             success = self.profile_manager.update_user_profile(
                 user_uid=self.current_user_uid,
-                username=username,
-                email=email,
-                risk_profile=risk_profile
+                profile_data=profile_data
             )
             
             if success:
@@ -266,14 +271,15 @@ class ProfileTab(QWidget):
                 return
             
             profile = self.profile_manager.get_user_profile(user_uid=self.current_user_uid)
-            if profile:
+            if profile and 'user' in profile:
+                user_data = profile['user']
                 info_text = f"""
-User ID: {profile['uid']}
-Username: {profile['username']}
-Email: {profile['email']}
-Risk Profile: {profile['risk_profile']}
-Created: {profile.get('created_at', 'N/A')}
-Last Updated: {profile.get('updated_at', 'N/A')}
+User ID: {user_data['uid']}
+Username: {user_data['username']}
+Email: {user_data.get('email', 'N/A')}
+Risk Profile: {user_data.get('risk_profile', 'N/A')}
+Created: {user_data.get('created_at', 'N/A')}
+Last Updated: {user_data.get('updated_at', 'N/A')}
                 """.strip()
                 
                 self.profile_display.setText(info_text)
