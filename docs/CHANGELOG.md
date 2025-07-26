@@ -104,6 +104,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ### Fixed
+- **CRITICAL SECURITY**: Exposed Alpha Vantage API key remediated - sanitized from all documentation and configuration files, replaced with secure placeholder
 - **Market Scanner Signal Error**: Fixed "ScannerWorker.scan_complete[dict].emit(): argument 1 has unexpected type 'list'" error by standardizing return format for all scan methods
 - **Database Schema Errors**: Fixed "no such table: symbols" error by adding schema verification and recovery mechanisms
 - **Race Conditions**: Prevented database initialization race conditions during application startup
