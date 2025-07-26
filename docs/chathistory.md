@@ -383,8 +383,76 @@ The AI-Driven Stock Trade Advisor is a comprehensive Windows-based application t
 1. ✅ Database schema and infrastructure implemented
 2. ✅ UID system and indexing optimized
 3. ✅ Business logic aligned with database structure
-4. Begin user profile management system implementation
-5. Integrate database with existing API infrastructure
+4. ✅ Enhanced scope with smart features
+5. Begin user profile management system implementation
+6. Integrate database with existing API infrastructure
+
+**Working Directory**: `C:\Users\blake\Cursor Development\Agent Green`
+
+---
+
+## 2025-07-26 14:35:00 - Scope Enhancement and Smart Features
+
+**User**: add to the scope, create quick searches for Top 50 movers, and other relevant searches. Trying to figure out ways to reduce the amount of calls and data that we'll need to manage to make the app most useful. We could create a ticker watcher tool that allows user to select specific symbols to watch and have the app learn from. Perhaps a utility that also listens for business news and world events for their related ticker symbols to create a smart watchlist.
+
+**Apollo**: I'll enhance the project scope with smart watchlist features, Top 50 movers scanner, and news monitoring to optimize data usage and create a more intelligent trading advisor.
+
+**Actions Taken**:
+- Enhanced project scope with smart features:
+  - Smart watchlist management with user-selected symbols
+  - Top 50 movers scanner and market data optimization
+  - Business news and world events monitoring for ticker relevance
+  - Intelligent data caching to minimize API calls
+  - Learning system that adapts to user preferences
+- Updated database schema with new tables:
+  - watchlists and watchlist_symbols for user watchlists
+  - news_articles and news_symbols for news monitoring
+  - market_movers for tracking top gainers/losers
+- Added comprehensive indexing for new features:
+  - Watchlist performance indexes
+  - News and sentiment analysis indexes
+  - Market movers ranking indexes
+- Created new database views for efficient queries:
+  - v_user_watchlists for user watchlist data
+  - v_top_movers for market movers analysis
+  - v_news_symbols for news-symbol associations
+- Updated TODOS.md with new development phases:
+  - Phase 3: Market scanner and watchlist system
+  - Phase 6: Enhanced learning with user preferences
+  - Phase 10: Smart data management for optimization
+
+**Key Results**:
+1. **Smart Watchlist System**: User-defined symbol collections with priority and notes
+2. **Top 50 Movers Scanner**: Automated tracking of market leaders and laggards
+3. **News Monitoring**: Business news and world events with sentiment analysis
+4. **Data Optimization**: Intelligent caching and API call reduction strategies
+5. **Learning Integration**: User preference learning and watchlist optimization
+6. **Database Enhancement**: 17 tables, 6 views, 68 indexes for comprehensive functionality
+
+**Database Structure Added**:
+- **Watchlists**: User-defined symbol collections with priority management
+- **News Monitoring**: Financial news with sentiment and relevance scoring
+- **Market Movers**: Top gainers/losers tracking with ranking system
+- **Performance Views**: Optimized queries for watchlist and news data
+
+**Rules Triggered**:
+- Rule 3.1: Broke down scope enhancement into manageable components
+- Rule 4.0-4.5: Updated all documentation with new features
+- Rule 5.4: Identified as Apollo, matter-of-fact developer
+- Rule 5.5: Used plain language for accessibility
+
+**Current Status**: 
+- Project scope significantly enhanced with smart features
+- Database schema expanded to support watchlists and news monitoring
+- Data optimization strategies planned for API call reduction
+- Ready to proceed with implementation of smart features
+
+**Next Steps Proposed**:
+1. ✅ Enhanced scope with smart watchlist and news features
+2. ✅ Database schema expanded for new functionality
+3. ✅ Documentation updated with new features
+4. Begin implementation of market scanner and watchlist system
+5. Integrate news monitoring with existing API infrastructure
 
 **Working Directory**: `C:\Users\blake\Cursor Development\Agent Green`
 

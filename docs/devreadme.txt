@@ -21,6 +21,11 @@ Core Features:
 - Performance analytics and tracking
 - Machine learning-based adaptive strategies
 - Local data storage and privacy protection
+- Smart watchlist management with user-selected symbols
+- Top 50 movers and market scanner functionality
+- Business news and world events monitoring for ticker relevance
+- Intelligent data caching to minimize API calls
+- Learning system that adapts to user preferences and market conditions
 
 TECH STACK
 ----------
@@ -55,6 +60,8 @@ External APIs:
 - Yahoo Finance (supplementary data)
 - Alpaca Trading API (paper trading)
 - News API (sentiment analysis)
+- Market Scanner APIs (for top movers and market data)
+- Financial News APIs (for business events and world news)
 
 ARCHITECTURE COMPONENTS
 ----------------------
@@ -62,11 +69,17 @@ ARCHITECTURE COMPONENTS
    - API integration modules
    - Data caching and storage
    - Real-time data streaming
+   - Market scanner for top movers
+   - News monitoring and sentiment analysis
+   - Intelligent data filtering and prioritization
 
 2. User Profile & Risk Module
    - Risk tolerance assessment
    - Investment goals tracking
    - Profile management
+   - Smart watchlist configuration
+   - Learning preferences and market interests
+   - Personalized news and event filtering
 
 3. Trade Suggestion Engine
    - Rule-based expert system

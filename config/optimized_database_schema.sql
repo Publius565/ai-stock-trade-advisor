@@ -12,6 +12,34 @@ PRAGMA temp_store = MEMORY;
 -- CORE ENTITIES (with UIDs)
 -- ============================================================================
 
+-- Watchlists: User-defined symbol collections
+CREATE TABLE IF NOT EXISTS watchlists (
+    uid TEXT PRIMARY KEY,
+    id INTEGER UNIQUE,
+    user_id INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    description TEXT,
+    is_default INTEGER DEFAULT 0,
+    is_active INTEGER DEFAULT 1,
+    created_at INTEGER DEFAULT (unixepoch()),
+    updated_at INTEGER DEFAULT (unixepoch()),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+-- Watchlist symbols: Many-to-many relationship
+CREATE TABLE IF NOT EXISTS watchlist_symbols (
+    uid TEXT PRIMARY KEY,
+    id INTEGER UNIQUE,
+    watchlist_id INTEGER NOT NULL,
+    symbol_id INTEGER NOT NULL,
+    added_at INTEGER DEFAULT (unixepoch()),
+    priority INTEGER DEFAULT 0, -- User-defined priority
+    notes TEXT, -- User notes about this symbol
+    FOREIGN KEY (watchlist_id) REFERENCES watchlists(id),
+    FOREIGN KEY (symbol_id) REFERENCES symbols(id),
+    UNIQUE(watchlist_id, symbol_id)
+);
+
 -- Users: Core user profiles with UIDs
 CREATE TABLE IF NOT EXISTS users (
     uid TEXT PRIMARY KEY, -- UUID for object identification
@@ -193,6 +221,51 @@ CREATE TABLE IF NOT EXISTS predictions (
 );
 
 -- ============================================================================
+-- NEWS & EVENTS MONITORING
+-- ============================================================================
+
+-- News articles: Financial news and events
+CREATE TABLE IF NOT EXISTS news_articles (
+    uid TEXT PRIMARY KEY,
+    id INTEGER UNIQUE,
+    title TEXT NOT NULL,
+    content TEXT,
+    source TEXT NOT NULL,
+    url TEXT,
+    published_at INTEGER NOT NULL,
+    sentiment_score REAL, -- -1 to 1 scale
+    relevance_score REAL, -- 0 to 1 scale
+    created_at INTEGER DEFAULT (unixepoch())
+);
+
+-- News symbol associations: Many-to-many relationship
+CREATE TABLE IF NOT EXISTS news_symbols (
+    uid TEXT PRIMARY KEY,
+    id INTEGER UNIQUE,
+    news_id INTEGER NOT NULL,
+    symbol_id INTEGER NOT NULL,
+    relevance_score REAL DEFAULT 1.0,
+    FOREIGN KEY (news_id) REFERENCES news_articles(id),
+    FOREIGN KEY (symbol_id) REFERENCES symbols(id),
+    UNIQUE(news_id, symbol_id)
+);
+
+-- Market movers: Top gainers/losers tracking
+CREATE TABLE IF NOT EXISTS market_movers (
+    uid TEXT PRIMARY KEY,
+    id INTEGER UNIQUE,
+    symbol_id INTEGER NOT NULL,
+    date INTEGER NOT NULL,
+    change_percent REAL NOT NULL,
+    volume_change_percent REAL,
+    price_change REAL NOT NULL,
+    mover_type TEXT CHECK(mover_type IN ('gainer', 'loser', 'volume')) NOT NULL,
+    rank INTEGER, -- Position in top movers list
+    created_at INTEGER DEFAULT (unixepoch()),
+    FOREIGN KEY (symbol_id) REFERENCES symbols(id)
+);
+
+-- ============================================================================
 -- SYSTEM & AUDIT (Minimal but essential)
 -- ============================================================================
 
@@ -247,6 +320,22 @@ CREATE INDEX IF NOT EXISTS idx_performance_date ON performance(date DESC);
 -- ML model indexes
 CREATE INDEX IF NOT EXISTS idx_predictions_model_symbol ON predictions(model_id, symbol_id);
 CREATE INDEX IF NOT EXISTS idx_predictions_symbol_date ON predictions(symbol_id, prediction_date DESC);
+
+-- Watchlist indexes
+CREATE INDEX IF NOT EXISTS idx_watchlists_user ON watchlists(user_id);
+CREATE INDEX IF NOT EXISTS idx_watchlist_symbols_watchlist ON watchlist_symbols(watchlist_id);
+CREATE INDEX IF NOT EXISTS idx_watchlist_symbols_symbol ON watchlist_symbols(symbol_id);
+
+-- News and events indexes
+CREATE INDEX IF NOT EXISTS idx_news_articles_published ON news_articles(published_at DESC);
+CREATE INDEX IF NOT EXISTS idx_news_articles_sentiment ON news_articles(sentiment_score);
+CREATE INDEX IF NOT EXISTS idx_news_symbols_news ON news_symbols(news_id);
+CREATE INDEX IF NOT EXISTS idx_news_symbols_symbol ON news_symbols(symbol_id);
+
+-- Market movers indexes
+CREATE INDEX IF NOT EXISTS idx_market_movers_date_type ON market_movers(date DESC, mover_type);
+CREATE INDEX IF NOT EXISTS idx_market_movers_symbol_date ON market_movers(symbol_id, date DESC);
+CREATE INDEX IF NOT EXISTS idx_market_movers_rank ON market_movers(rank) WHERE rank IS NOT NULL;
 
 -- Audit and API indexes
 CREATE INDEX IF NOT EXISTS idx_audit_user_date ON audit_log(user_id, created_at DESC);
@@ -321,4 +410,55 @@ SELECT
     SUM(p.realized_pnl) as total_realized_pnl
 FROM users u
 LEFT JOIN positions p ON u.id = p.user_id
-GROUP BY u.id, u.username; 
+GROUP BY u.id, u.username;
+
+-- User watchlist with symbol info
+CREATE VIEW IF NOT EXISTS v_user_watchlists AS
+SELECT 
+    w.uid as watchlist_uid,
+    w.name as watchlist_name,
+    w.description,
+    u.username,
+    s.symbol,
+    s.name as company_name,
+    ws.priority,
+    ws.notes,
+    ws.added_at
+FROM watchlists w
+JOIN users u ON w.user_id = u.id
+JOIN watchlist_symbols ws ON w.id = ws.watchlist_id
+JOIN symbols s ON ws.symbol_id = s.id
+WHERE w.is_active = 1
+ORDER BY w.name, ws.priority DESC, s.symbol;
+
+-- Top market movers
+CREATE VIEW IF NOT EXISTS v_top_movers AS
+SELECT 
+    s.symbol,
+    s.name as company_name,
+    mm.change_percent,
+    mm.volume_change_percent,
+    mm.price_change,
+    mm.mover_type,
+    mm.rank,
+    mm.date
+FROM market_movers mm
+JOIN symbols s ON mm.symbol_id = s.id
+WHERE mm.rank IS NOT NULL
+ORDER BY mm.date DESC, mm.rank;
+
+-- News with symbol associations
+CREATE VIEW IF NOT EXISTS v_news_symbols AS
+SELECT 
+    na.uid as news_uid,
+    na.title,
+    na.source,
+    na.published_at,
+    na.sentiment_score,
+    na.relevance_score,
+    s.symbol,
+    ns.relevance_score as symbol_relevance
+FROM news_articles na
+JOIN news_symbols ns ON na.id = ns.news_id
+JOIN symbols s ON ns.symbol_id = s.id
+ORDER BY na.published_at DESC; 
