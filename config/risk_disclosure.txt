@@ -1,0 +1,93 @@
+AI-DRIVEN STOCK TRADE ADVISOR - RISK DISCLOSURE STATEMENT
+
+IMPORTANT: PLEASE READ CAREFULLY BEFORE USING THIS SOFTWARE
+
+This software is provided for educational and research purposes only. It is not intended to provide financial advice, and should not be considered as such.
+
+RISK WARNINGS:
+
+1. INVESTMENT RISKS
+   - All investments carry risk of loss
+   - Past performance does not guarantee future results
+   - Stock prices can be volatile and unpredictable
+   - You may lose some or all of your invested capital
+
+2. SOFTWARE LIMITATIONS
+   - This software uses artificial intelligence and machine learning algorithms
+   - AI predictions are not guaranteed to be accurate
+   - Market conditions can change rapidly, making predictions obsolete
+   - Technical failures or data errors may occur
+
+3. PAPER TRADING VS REAL TRADING
+   - Paper trading simulates real market conditions but does not involve real money
+   - Results from paper trading may not reflect actual trading performance
+   - Real trading involves additional risks including execution delays and slippage
+
+4. DATA AND INFORMATION
+   - Market data may be delayed or inaccurate
+   - API services may be unavailable or provide incorrect information
+   - Technical indicators and analysis tools have limitations
+
+5. REGULATORY COMPLIANCE
+   - This software is not registered with any regulatory authority
+   - Users are responsible for compliance with applicable securities laws
+   - Tax implications of trading activities are the user's responsibility
+
+6. PRIVACY AND SECURITY
+   - While this software operates locally, API calls may transmit data to third parties
+   - Users are responsible for securing their API keys and credentials
+   - No guarantee of data security or privacy protection
+
+DISCLAIMERS:
+
+1. NO FINANCIAL ADVICE
+   - This software does not constitute financial advice
+   - Users should consult with qualified financial advisors before making investment decisions
+   - The software's recommendations are for informational purposes only
+
+2. NO WARRANTIES
+   - This software is provided "as is" without warranties of any kind
+   - The developers disclaim all warranties, express or implied
+   - No warranty is made regarding accuracy, reliability, or fitness for any purpose
+
+3. LIMITATION OF LIABILITY
+   - The developers shall not be liable for any damages arising from use of this software
+   - This includes but is not limited to financial losses, data loss, or system damage
+   - Users assume all risks associated with using this software
+
+4. THIRD-PARTY SERVICES
+   - This software integrates with third-party APIs and services
+   - The developers are not responsible for the accuracy or availability of third-party data
+   - Users are subject to the terms of service of third-party providers
+
+USER ACKNOWLEDGMENTS:
+
+By using this software, you acknowledge that:
+
+1. You have read and understand this risk disclosure statement
+2. You understand that investing involves risk of loss
+3. You will not rely solely on this software for investment decisions
+4. You will consult with qualified professionals as needed
+5. You accept responsibility for your investment decisions
+6. You understand that past performance does not guarantee future results
+
+RECOMMENDATIONS:
+
+1. Start with paper trading to understand the software's capabilities
+2. Never invest more than you can afford to lose
+3. Diversify your investments across different assets and strategies
+4. Monitor your positions regularly and adjust as needed
+5. Keep detailed records of your trading activities
+6. Consider consulting with a financial advisor
+
+CONTACT INFORMATION:
+
+For questions about this software or risk disclosure:
+- Review the documentation in the /docs/ directory
+- Check the project repository for updates and information
+- This software is for educational purposes only
+
+VERSION: 1.0
+LAST UPDATED: 2025-07-26
+
+By proceeding to use this software, you acknowledge that you have read, understood, and agree to the terms of this risk disclosure statement. 
