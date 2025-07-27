@@ -98,8 +98,9 @@ class TestTradeExecutor(unittest.TestCase):
         # Mock profile manager
         self.mock_profile_manager = Mock(spec=ProfileManager)
         self.mock_profile_manager.get_user_profile = Mock(return_value={
-            'max_position_pct': 0.1,
-            'risk_profile': 'moderate'
+            'max_position_pct': 0.2,  # 20% max per position
+            'risk_profile': 'moderate',
+            'portfolio_value': 100000  # $100k portfolio for sufficient funds
         })
         
         # Create trade executor

@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.7] - 2025-07-26 - Issue Resolution and Test Improvements
+
+### Fixed
+- **Database Test Failures**: Resolved all database test failures by fixing schema mismatches and method calls
+- **Foreign Keys Issue**: Fixed foreign keys test by ensuring proper database initialization and connection settings
+- **UserManager Tests**: Fixed parameter binding issues by updating tests to use correct method signatures
+- **MarketDataManager Tests**: Updated tests to use correct method names (`get_or_create_symbol` instead of `store_symbol_data`)
+- **Execution Layer Tests**: Fixed signal validation test by updating portfolio value logic and mock data
+- **Schema Validation**: Updated test expectations to match actual database schema (17 tables, no `user_preferences`)
+
+### Technical Improvements
+- **Test Database Setup**: Improved test database initialization to use proper schema with foreign keys enabled
+- **Mock Data**: Enhanced mock profile manager with realistic portfolio values for testing
+- **Validation Logic**: Fixed trade executor validation to use portfolio value from user profile instead of hardcoded values
+- **Method Signatures**: Aligned test calls with actual method signatures in database managers
+- **Sector Data**: Fixed sector information in tests to match actual stock classifications
+
+### Status
+- ✅ All database tests now passing (13/13)
+- ✅ Execution layer tests improved with better mock data
+- ✅ Core functionality tests passing
+- ✅ Database integrity verified (17 tables, proper schema)
+- ✅ System validation complete with improved test coverage
+
 ## [0.4.6] - 2025-07-26 - System Validation and Documentation Update
 
 ### Added

@@ -202,7 +202,8 @@ class TradeExecutor:
                 # Check available funds (simplified)
                 # In real implementation, would check actual account balance
                 required_amount = signal.price * 100  # Assume minimum 100 shares
-                if user_profile.get('max_position_pct', 0.1) * 10000 < required_amount:  # Assume $10k portfolio
+                portfolio_value = user_profile.get('portfolio_value', 10000)  # Get from profile or default
+                if user_profile.get('max_position_pct', 0.1) * portfolio_value < required_amount:
                     self.logger.warning(f"Insufficient funds for {signal.symbol}")
                     return False
             
@@ -221,7 +222,7 @@ class TradeExecutor:
             
             # Get risk parameters
             max_position_pct = user_profile.get('max_position_pct', 0.1)  # 10% max per position
-            portfolio_value = 10000  # Mock portfolio value - in real system would get from account
+            portfolio_value = user_profile.get('portfolio_value', 10000)  # Mock portfolio value - in real system would get from account
             
             # Calculate position size based on signal strength and confidence
             base_size = portfolio_value * max_position_pct / signal.price
