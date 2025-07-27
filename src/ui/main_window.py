@@ -24,7 +24,7 @@ from src.profile.profile_manager import ProfileManager
 from src.data_layer.market_scanner import MarketScanner
 from src.ui.components import (
     ProfileTab, MarketScannerTab, WatchlistTab, DashboardTab, 
-    MLPredictionsTab, TradingSignalsTab
+    MLPredictionsTab, TradingSignalsTab, ExecutionTab, PositionsTab, PerformanceTab
 )
 
 logger = logging.getLogger(__name__)
@@ -48,6 +48,9 @@ class MainWindow(QMainWindow):
         self.dashboard_tab = None
         self.ml_predictions_tab = None
         self.trading_signals_tab = None
+        self.execution_tab = None
+        self.positions_tab = None
+        self.performance_tab = None
         
         self.init_ui()
         self.init_database()
@@ -100,6 +103,18 @@ class MainWindow(QMainWindow):
         self.trading_signals_tab = TradingSignalsTab()
         self.tab_widget.addTab(self.trading_signals_tab, "📈 Trading Signals")
         
+        # Execution Tab - NEW FEATURE (Phase 4A/B)
+        self.execution_tab = ExecutionTab()
+        self.tab_widget.addTab(self.execution_tab, "⚡ Trade Execution")
+        
+        # Positions Tab - NEW FEATURE (Phase 4A/B)
+        self.positions_tab = PositionsTab()
+        self.tab_widget.addTab(self.positions_tab, "📋 Positions")
+        
+        # Performance Tab - NEW FEATURE (Phase 4A/B)
+        self.performance_tab = PerformanceTab()
+        self.tab_widget.addTab(self.performance_tab, "📊 Performance Analytics")
+        
         # Dashboard Tab
         self.dashboard_tab = DashboardTab()
         self.tab_widget.addTab(self.dashboard_tab, "Dashboard")
@@ -128,6 +143,26 @@ class MainWindow(QMainWindow):
             self.signal_generator = SignalGenerator(self.db_manager, self.trading_engine)
             logger.info("Trading system components initialized")
             
+            # Initialize execution layer components (Phase 4A/B)
+            from src.execution.trade_executor import TradeExecutor
+            from src.execution.position_monitor import PositionMonitor
+            from src.execution.performance_tracker import PerformanceTracker
+            from src.execution.alpaca_broker import AlpacaBroker
+            
+            self.trade_executor = TradeExecutor(self.db_manager, self.profile_manager)
+            self.position_monitor = PositionMonitor(self.db_manager)
+            self.performance_tracker = PerformanceTracker(self.db_manager)
+            
+            # Initialize Alpaca broker with default values (will be configured later)
+            try:
+                self.alpaca_broker = AlpacaBroker("", "", "https://paper-api.alpaca.markets")
+                logger.info("Alpaca broker initialized with default config")
+            except Exception as e:
+                logger.warning(f"Alpaca broker initialization failed: {e}")
+                self.alpaca_broker = None
+            
+            logger.info("Execution layer components initialized")
+            
             # Set managers in tabs
             self.profile_tab.set_profile_manager(self.profile_manager)
             self.scanner_tab.set_market_scanner(self.market_scanner)
@@ -143,6 +178,20 @@ class MainWindow(QMainWindow):
             self.trading_signals_tab.set_profile_manager(self.profile_manager)
             self.trading_signals_tab.set_trading_engine(self.trading_engine)
             self.trading_signals_tab.set_signal_generator(self.signal_generator)
+            
+            # Set managers in execution layer tabs (Phase 4A/B)
+            self.execution_tab.set_db_manager(self.db_manager)
+            self.execution_tab.set_profile_manager(self.profile_manager)
+            self.execution_tab.set_trade_executor(self.trade_executor)
+            self.execution_tab.set_alpaca_broker(self.alpaca_broker)
+            
+            self.positions_tab.set_db_manager(self.db_manager)
+            self.positions_tab.set_profile_manager(self.profile_manager)
+            self.positions_tab.set_position_monitor(self.position_monitor)
+            
+            self.performance_tab.set_db_manager(self.db_manager)
+            self.performance_tab.set_profile_manager(self.profile_manager)
+            self.performance_tab.set_performance_tracker(self.performance_tracker)
             
             self.statusBar().showMessage("Managers initialized successfully")
             
@@ -186,6 +235,21 @@ class MainWindow(QMainWindow):
             # Trading Signals tab signals
             self.trading_signals_tab.activity_logged.connect(self.log_activity)
             self.trading_signals_tab.status_updated.connect(self.update_status)
+        
+        if self.execution_tab:
+            # Execution tab signals
+            self.execution_tab.activity_logged.connect(self.log_activity)
+            self.execution_tab.status_updated.connect(self.update_status)
+        
+        if self.positions_tab:
+            # Positions tab signals
+            self.positions_tab.activity_logged.connect(self.log_activity)
+            self.positions_tab.status_updated.connect(self.update_status)
+        
+        if self.performance_tab:
+            # Performance tab signals
+            self.performance_tab.activity_logged.connect(self.log_activity)
+            self.performance_tab.status_updated.connect(self.update_status)
     
     def on_profile_created(self, user_uid: str):
         """Handle profile creation."""
@@ -211,6 +275,12 @@ class MainWindow(QMainWindow):
             self.ml_predictions_tab.set_current_user(user_uid)
         if self.trading_signals_tab:
             self.trading_signals_tab.set_current_user(user_uid)
+        if self.execution_tab:
+            self.execution_tab.set_current_user(user_uid)
+        if self.positions_tab:
+            self.positions_tab.set_current_user(user_uid)
+        if self.performance_tab:
+            self.performance_tab.set_current_user(user_uid)
     
     def log_activity(self, message: str):
         """Log activity to dashboard."""

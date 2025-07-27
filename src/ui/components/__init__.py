@@ -10,6 +10,9 @@ from .watchlist_tab import WatchlistTab
 from .dashboard_tab import DashboardTab
 from .ml_predictions_tab import MLPredictionsTab
 from .trading_signals_tab import TradingSignalsTab
+from .execution_tab import ExecutionTab
+from .positions_tab import PositionsTab
+from .performance_tab import PerformanceTab
 
 __all__ = [
     'ProfileTab',
@@ -17,5 +20,8 @@ __all__ = [
     'WatchlistTab',
     'DashboardTab',
     'MLPredictionsTab',
-    'TradingSignalsTab'
+    'TradingSignalsTab',
+    'ExecutionTab',
+    'PositionsTab',
+    'PerformanceTab'
 ] 
