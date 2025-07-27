@@ -2,8 +2,23 @@
 Trade Execution Package
 
 This package handles trade execution, position monitoring, and performance tracking.
+Part of Phase 4: Execution Layer implementation
 """
 
-from . import trade_executor
-from . import position_monitor
-from . import performance_tracker 
+from .trade_executor import TradeExecutor, MockBroker, TradeOrder, OrderType, OrderStatus
+from .position_monitor import PositionMonitor, Position, PositionStatus
+from .performance_tracker import PerformanceTracker, PerformanceSnapshot, PerformanceMetric
+
+__all__ = [
+    'TradeExecutor',
+    'MockBroker', 
+    'TradeOrder',
+    'OrderType',
+    'OrderStatus',
+    'PositionMonitor',
+    'Position',
+    'PositionStatus',
+    'PerformanceTracker',
+    'PerformanceSnapshot',
+    'PerformanceMetric'
+] 
