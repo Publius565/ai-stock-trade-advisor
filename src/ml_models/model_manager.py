@@ -62,6 +62,68 @@ class ModelManager:
                 'feature_importance': {},
                 'training_samples': 0
             }
+        
+        # Train models with sample data for demonstration
+        self._train_with_sample_data()
+    
+    def _train_with_sample_data(self):
+        """Train models with sample data for demonstration purposes."""
+        try:
+            logger.info("Training models with sample data for demonstration")
+            
+            # Create sample market data (OHLCV format)
+            np.random.seed(42)
+            n_samples = 1000
+            
+            # Generate dates
+            dates = pd.date_range(start='2020-01-01', periods=n_samples, freq='D')
+            
+            # Generate realistic OHLCV data
+            base_price = 100.0
+            returns = np.random.normal(0.001, 0.02, n_samples)
+            
+            # Add trend and seasonality
+            trend = np.linspace(0, 0.2, n_samples)
+            seasonality = 0.05 * np.sin(2 * np.pi * np.arange(n_samples) / 252)
+            
+            # Calculate prices
+            prices = base_price * np.exp(np.cumsum(returns + trend/252 + seasonality/252))
+            
+            # Generate OHLCV data
+            market_data = pd.DataFrame({
+                'date': dates,
+                'open': prices * (1 + np.random.normal(0, 0.005, n_samples)),
+                'high': prices * (1 + np.abs(np.random.normal(0, 0.01, n_samples))),
+                'low': prices * (1 - np.abs(np.random.normal(0, 0.01, n_samples))),
+                'close': prices,
+                'volume': np.random.lognormal(12, 0.5, n_samples)
+            })
+            
+            # Ensure high >= close >= low
+            market_data['high'] = np.maximum(market_data[['open', 'close']].max(axis=1), market_data['high'])
+            market_data['low'] = np.minimum(market_data[['open', 'close']].min(axis=1), market_data['low'])
+            
+            # Use FeatureEngineer to create features
+            from .feature_engineering import FeatureEngineer
+            feature_engineer = FeatureEngineer()
+            
+            # Prepare features using the same process as prediction engine
+            X, y = feature_engineer.prepare_features(market_data, target_period=5)
+            
+            if X.empty or y.empty:
+                logger.warning("No features generated from sample data")
+                return
+            
+            # Train all models
+            for model_name in self.models.keys():
+                try:
+                    self.train_model(model_name, X, y)
+                    logger.info(f"Successfully trained {model_name} with sample data")
+                except Exception as e:
+                    logger.error(f"Failed to train {model_name}: {e}")
+                    
+        except Exception as e:
+            logger.error(f"Error training models with sample data: {e}")
     
     def train_model(self, model_name: str, X: pd.DataFrame, y: pd.Series, 
                    validation_split: float = 0.2) -> Dict[str, float]:

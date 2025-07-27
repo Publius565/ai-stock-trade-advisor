@@ -205,14 +205,19 @@ class MLPredictionsTab(QWidget):
         if manager and not self.trade_suggestion_engine:
             try:
                 from src.strategy.trading_engine import TradingEngine
+                from src.strategy.signal_generator import SignalGenerator
+                
                 # Note: profile_manager will be set later via set_profile_manager
                 if hasattr(self, 'profile_manager') and self.profile_manager:
                     trading_engine = TradingEngine(manager, self.profile_manager)
+                    signal_generator = SignalGenerator(manager, trading_engine)
+                    
                     self.trade_suggestion_engine = TradeSuggestionEngine(
                         db_manager=manager, 
-                        trading_engine=trading_engine
+                        trading_engine=trading_engine,
+                        signal_generator=signal_generator
                     )
-                    logger.info("ML components re-initialized with database manager")
+                    logger.info("ML components re-initialized with database manager and signal generator")
                 else:
                     logger.warning("Profile manager not available for ML component initialization")
             except Exception as e:
@@ -318,10 +323,26 @@ class MLPredictionsTab(QWidget):
     def display_prediction_summary(self, symbol: str, prediction: Dict):
         """Display prediction summary in text widget."""
         try:
-            confidence = prediction.get('confidence', 0)
-            predicted_price = prediction.get('predicted_price', 0)
-            predicted_return = prediction.get('predicted_return', 0)
-            risk_assessment = prediction.get('risk_assessment', {})
+            # Safely extract values with defaults
+            confidence = prediction.get('confidence', 0) or 0
+            predicted_price = prediction.get('predicted_price', 0) or 0
+            predicted_return = prediction.get('predicted_return', 0) or 0
+            risk_assessment = prediction.get('risk_assessment', {}) or {}
+            
+            # Get model predictions with safe defaults
+            model_predictions = prediction.get('model_predictions', {}) or {}
+            rf_pred = model_predictions.get('random_forest', 'N/A')
+            gb_pred = model_predictions.get('gradient_boosting', 'N/A')
+            lr_pred = model_predictions.get('linear_regression', 'N/A')
+            
+            # Format model predictions safely
+            def format_prediction(pred):
+                if pred == 'N/A':
+                    return 'N/A'
+                try:
+                    return f"{pred:.4f}"
+                except (TypeError, ValueError):
+                    return 'N/A'
             
             summary = f"""
 🎯 ML Prediction for {symbol}
@@ -332,9 +353,9 @@ class MLPredictionsTab(QWidget):
 ⚡ Risk Level: {risk_assessment.get('risk_level', 'Unknown')}
 
 🤖 Model Consensus:
-• Random Forest: {prediction.get('model_predictions', {}).get('random_forest', 'N/A')}
-• Gradient Boosting: {prediction.get('model_predictions', {}).get('gradient_boosting', 'N/A')}
-• Linear Regression: {prediction.get('model_predictions', {}).get('linear_regression', 'N/A')}
+• Random Forest: {format_prediction(rf_pred)}
+• Gradient Boosting: {format_prediction(gb_pred)}
+• Linear Regression: {format_prediction(lr_pred)}
 
 ⚠️ Risk Factors:
 • Volatility: {risk_assessment.get('volatility_score', 'N/A')}
