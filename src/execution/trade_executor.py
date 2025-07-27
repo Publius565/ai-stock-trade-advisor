@@ -7,50 +7,15 @@ import logging
 import uuid
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple
-from dataclasses import dataclass
-from enum import Enum
 
 from ..utils.database_manager import DatabaseManager
 from ..strategy.trading_engine import TradingSignal, SignalType
 from ..profile.profile_manager import ProfileManager
+from .alpaca_broker import AlpacaBroker
+from .trading_types import TradeOrder, OrderType, OrderStatus
 
 
-class OrderType(Enum):
-    """Order types for trade execution"""
-    MARKET = "market"
-    LIMIT = "limit"
-    STOP = "stop"
-    STOP_LIMIT = "stop_limit"
 
-
-class OrderStatus(Enum):
-    """Order status tracking"""
-    PENDING = "pending"
-    FILLED = "filled"
-    PARTIALLY_FILLED = "partially_filled"
-    CANCELLED = "cancelled"
-    REJECTED = "rejected"
-
-
-@dataclass
-class TradeOrder:
-    """Trade order data structure"""
-    uid: str
-    user_id: int
-    symbol: str
-    order_type: OrderType
-    quantity: int
-    price: float
-    signal_id: Optional[str] = None
-    stop_price: Optional[float] = None
-    limit_price: Optional[float] = None
-    status: OrderStatus = OrderStatus.PENDING
-    filled_quantity: int = 0
-    filled_price: Optional[float] = None
-    commission: float = 0.0
-    created_at: datetime = None
-    filled_at: Optional[datetime] = None
-    notes: str = ""
 
 
 class MockBroker:
@@ -114,7 +79,7 @@ class TradeExecutor:
     def __init__(self, db_manager: DatabaseManager, profile_manager: ProfileManager):
         self.db_manager = db_manager
         self.profile_manager = profile_manager
-        self.broker = MockBroker()
+        self.broker = None  # Will be initialized based on configuration
         self.logger = logging.getLogger(__name__)
         
         # Execution state
@@ -124,11 +89,49 @@ class TradeExecutor:
         
         self.logger.info("Trade Executor initialized")
     
-    def enable_execution(self, enabled: bool = True, paper_trading: bool = True) -> None:
+    def enable_execution(self, enabled: bool = True, paper_trading: bool = True, use_alpaca: bool = True) -> None:
         """Enable or disable trade execution"""
         self.execution_enabled = enabled
         self.paper_trading = paper_trading
-        self.logger.info(f"Trade execution {'enabled' if enabled else 'disabled'} (paper_trading={paper_trading})")
+        
+        # Initialize broker based on configuration
+        if enabled and self.broker is None:
+            self._initialize_broker(use_alpaca)
+        
+        self.logger.info(f"Trade execution {'enabled' if enabled else 'disabled'} (paper_trading={paper_trading}, alpaca={use_alpaca})")
+    
+    def _initialize_broker(self, use_alpaca: bool = True) -> None:
+        """Initialize the appropriate broker interface"""
+        try:
+            if use_alpaca:
+                # Import config here to avoid circular imports
+                from config.config import ALPACA_API_KEY, ALPACA_SECRET_KEY, ALPACA_BASE_URL
+                
+                if not ALPACA_API_KEY or not ALPACA_SECRET_KEY:
+                    self.logger.warning("Alpaca API credentials not found, falling back to MockBroker")
+                    self.broker = MockBroker()
+                    return
+                
+                self.broker = AlpacaBroker(
+                    api_key=ALPACA_API_KEY,
+                    secret_key=ALPACA_SECRET_KEY,
+                    base_url=ALPACA_BASE_URL,
+                    paper_trading=self.paper_trading
+                )
+                
+                if not self.broker.is_connected():
+                    self.logger.warning("Failed to connect to Alpaca, falling back to MockBroker")
+                    self.broker = MockBroker()
+                else:
+                    self.logger.info("Successfully connected to Alpaca API")
+            else:
+                self.broker = MockBroker()
+                self.logger.info("Using MockBroker for testing")
+                
+        except Exception as e:
+            self.logger.error(f"Error initializing broker: {e}")
+            self.broker = MockBroker()
+            self.logger.info("Falling back to MockBroker")
     
     def execute_signal(self, signal: TradingSignal, user_id: int) -> Optional[TradeOrder]:
         """
@@ -136,6 +139,10 @@ class TradeExecutor:
         """
         if not self.execution_enabled:
             self.logger.warning("Trade execution is disabled")
+            return None
+        
+        if self.broker is None:
+            self.logger.error("Broker not initialized")
             return None
         
         try:
@@ -368,17 +375,61 @@ class TradeExecutor:
             
             result = self.db_manager.fetch_one(query, (user_id,))
             if result:
-                return {
+                summary = {
                     'total_orders': result[0] or 0,
                     'filled_orders': result[1] or 0,
                     'pending_orders': result[2] or 0,
                     'cancelled_orders': result[3] or 0,
                     'total_volume': result[4] or 0.0,
-                    'total_commission': result[5] or 0.0
+                    'total_commission': result[5] or 0.0,
+                    'execution_enabled': self.execution_enabled,
+                    'paper_trading': self.paper_trading
                 }
+                
+                # Add broker information
+                broker_info = self.get_broker_info()
+                summary['broker_info'] = broker_info
+                
+                return summary
             
-            return {}
+            return {
+                'execution_enabled': self.execution_enabled,
+                'paper_trading': self.paper_trading,
+                'broker_info': self.get_broker_info()
+            }
             
         except Exception as e:
             self.logger.error(f"Error getting execution summary: {e}")
-            return {} 
+            return {}
+    
+    def get_broker_info(self) -> Dict:
+        """Get current broker information"""
+        if self.broker is None:
+            return {
+                'type': 'none',
+                'connected': False,
+                'status': 'not_initialized'
+            }
+        
+        try:
+            if isinstance(self.broker, AlpacaBroker):
+                account_info = self.broker.get_account_info()
+                return {
+                    'type': 'alpaca',
+                    'connected': self.broker.is_connected(),
+                    'paper_trading': self.broker.paper_trading,
+                    'account_info': account_info
+                }
+            else:
+                return {
+                    'type': 'mock',
+                    'connected': True,
+                    'status': 'simulation_mode'
+                }
+        except Exception as e:
+            self.logger.error(f"Error getting broker info: {e}")
+            return {
+                'type': 'unknown',
+                'connected': False,
+                'status': 'error'
+            } 

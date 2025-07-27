@@ -33,10 +33,11 @@ logger = logging.getLogger(__name__)
 class MainWindow(QMainWindow):
     """Main application window for the AI-Driven Stock Trade Advisor."""
     
-    def __init__(self):
+    def __init__(self, trading_system=None):
         super().__init__()
-        self.db_manager = None
-        self.profile_manager = None
+        self.trading_system = trading_system or {}
+        self.db_manager = self.trading_system.get('db_manager')
+        self.profile_manager = self.trading_system.get('profile_manager')
         self.market_scanner = None
         self.current_user_uid = None
         
@@ -106,13 +107,14 @@ class MainWindow(QMainWindow):
     def init_database(self):
         """Initialize database and managers."""
         try:
-            # Initialize database manager
-            self.db_manager = DatabaseManager()
-            logger.info("Database manager initialized")
+            # Use provided trading system components or initialize new ones
+            if not self.db_manager:
+                self.db_manager = DatabaseManager()
+                logger.info("Database manager initialized")
             
-            # Initialize profile manager
-            self.profile_manager = ProfileManager(self.db_manager)
-            logger.info("Profile manager initialized")
+            if not self.profile_manager:
+                self.profile_manager = ProfileManager(self.db_manager)
+                logger.info("Profile manager initialized")
             
             # Initialize market scanner
             self.market_scanner = MarketScanner(self.db_manager)
@@ -130,6 +132,12 @@ class MainWindow(QMainWindow):
             self.ml_predictions_tab.set_profile_manager(self.profile_manager)
             self.trading_signals_tab.set_db_manager(self.db_manager)
             self.trading_signals_tab.set_profile_manager(self.profile_manager)
+            
+            # Set trading system components if available
+            if 'trading_engine' in self.trading_system:
+                self.trading_signals_tab.set_trading_engine(self.trading_system['trading_engine'])
+            if 'signal_generator' in self.trading_system:
+                self.trading_signals_tab.set_signal_generator(self.trading_system['signal_generator'])
             
             self.statusBar().showMessage("Managers initialized successfully")
             

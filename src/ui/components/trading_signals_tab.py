@@ -219,7 +219,15 @@ class TradingSignalsTab(QWidget):
         """Set the market data manager."""
         self.market_data_manager = manager
     
-
+    def set_trading_engine(self, engine):
+        """Set the trading engine."""
+        self.trading_engine = engine
+        logger.info("Trading engine set in TradingSignalsTab")
+    
+    def set_signal_generator(self, generator):
+        """Set the signal generator."""
+        self.signal_generator = generator
+        logger.info("Signal generator set in TradingSignalsTab")
     
     def set_current_user(self, user_uid: str):
         """Set the current user UID."""
