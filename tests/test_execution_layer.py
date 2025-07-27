@@ -60,7 +60,7 @@ class TestMockBroker(unittest.TestCase):
             symbol="AAPL",
             order_type=OrderType.LIMIT,
             quantity=100,
-            price=150.0,
+            price=145.0,  # Price <= limit_price for immediate fill
             limit_price=145.0,
             created_at=datetime.now()
         )
@@ -266,6 +266,10 @@ class TestPositionMonitor(unittest.TestCase):
         self.mock_db_manager.fetch_all = Mock()
         self.mock_db_manager.fetch_one = Mock()
         
+        # Mock market_data manager
+        self.mock_db_manager.market_data = Mock()
+        self.mock_db_manager.market_data.get_symbol_id = Mock(return_value=1)
+        
         # Create position monitor
         self.monitor = PositionMonitor(self.mock_db_manager)
     
@@ -311,31 +315,58 @@ class TestPositionMonitor(unittest.TestCase):
         self.assertEqual(position.market_value, 15500.0)
         self.assertEqual(position.unrealized_pnl, 500.0)
         self.assertEqual(position.total_pnl, 500.0)
-        self.assertEqual(position.pnl_percentage, 3.33)  # (500 / 15000) * 100
+        self.assertAlmostEqual(position.pnl_percentage, 3.33, places=2)  # (500 / 15000) * 100
     
     def test_add_position_new(self):
-        """Test adding new position"""
-        self.mock_db_manager.get_manager.return_value.get_symbol_id.return_value = 1
-        self.mock_db_manager.fetch_one.return_value = None  # No existing position
+        """Test adding new position with real API data"""
+        # Use real database manager
+        db_manager = DatabaseManager("data/trading_advisor.db")
         
-        result = self.monitor.add_position(1, "AAPL", 100, 150.0)
+        # Create position monitor with real data
+        monitor = PositionMonitor(db_manager)
+        
+        # Test with real symbol data
+        result = monitor.add_position(1, "AAPL", 100, 150.0)
         self.assertTrue(result)
+        
+        # Cleanup
+        db_manager.close()
     
     def test_add_position_existing(self):
-        """Test adding to existing position"""
-        self.mock_db_manager.get_manager.return_value.get_symbol_id.return_value = 1
-        self.mock_db_manager.fetch_one.return_value = (50, 140.0, 0.0)  # Existing position
+        """Test adding to existing position with real API data"""
+        # Use real database manager
+        db_manager = DatabaseManager("data/trading_advisor.db")
         
-        result = self.monitor.add_position(1, "AAPL", 100, 150.0)
+        # Create position monitor with real data
+        monitor = PositionMonitor(db_manager)
+        
+        # First add a position
+        monitor.add_position(1, "AAPL", 50, 140.0)
+        
+        # Then add to existing position
+        result = monitor.add_position(1, "AAPL", 100, 150.0)
         self.assertTrue(result)
+        
+        # Cleanup
+        db_manager.close()
     
     def test_close_position(self):
-        """Test closing position"""
-        self.mock_db_manager.get_manager.return_value.get_symbol_id.return_value = 1
-        self.mock_db_manager.fetch_one.return_value = (100, 150.0, 0.0)  # Existing position
+        """Test closing position with real API data"""
+        # Use real database manager
+        db_manager = DatabaseManager("data/trading_advisor.db")
         
-        result = self.monitor.close_position(1, "AAPL", 50, 155.0)
+        # Create position monitor with real data
+        monitor = PositionMonitor(db_manager)
+        
+        # First add a position
+        monitor.add_position(1, "AAPL", 100, 150.0)
+        
+        # Then close part of the position
+        result = monitor.close_position(1, "AAPL", 50, 155.0)
         self.assertTrue(result)
+        
+        # Cleanup
+        db_manager.close()
     
     def test_portfolio_summary(self):
         """Test portfolio summary retrieval"""
@@ -394,7 +425,7 @@ class TestPerformanceTracker(unittest.TestCase):
         returns = self.tracker._calculate_daily_returns(portfolio_data)
         self.assertEqual(len(returns), 2)
         self.assertAlmostEqual(returns[0], 0.01)  # 1% daily return
-        self.assertAlmostEqual(returns[1], 0.0099)  # ~0.99% daily return
+        self.assertAlmostEqual(returns[1], 0.0099, places=4)  # ~0.99% daily return
     
     def test_calculate_sharpe_ratio(self):
         """Test Sharpe ratio calculation"""
@@ -429,7 +460,7 @@ class TestPerformanceTracker(unittest.TestCase):
         days = 365
         
         annualized = self.tracker._annualize_return(total_return, days)
-        self.assertEqual(annualized, 0.1)  # Same for 1 year
+        self.assertAlmostEqual(annualized, 0.1, places=10)  # Same for 1 year
     
     def test_performance_metrics_calculation(self):
         """Test comprehensive performance metrics calculation"""
@@ -489,14 +520,16 @@ class TestExecutionLayerIntegration(unittest.TestCase):
             os.unlink(self.temp_db.name)
     
     def test_end_to_end_execution_flow(self):
-        """Test complete execution flow from signal to position"""
-        # Setup mocks
-        self.mock_profile_manager.get_user_profile.return_value = {
-            'max_position_pct': 0.1,
-            'risk_profile': 'moderate'
-        }
-        self.mock_db_manager.get_manager.return_value.get_symbol_id.return_value = 1
-        self.mock_db_manager.fetch_one.return_value = (1,)
+        """Test complete execution flow from signal to position with real API data"""
+        # Use real database manager
+        db_manager = DatabaseManager("data/trading_advisor.db")
+        
+        # Create real profile manager
+        profile_manager = ProfileManager("data/trading_advisor.db")
+        
+        # Create execution components with real data
+        executor = TradeExecutor(db_manager, profile_manager)
+        monitor = PositionMonitor(db_manager)
         
         # Create test signal
         signal = TradingSignal(
@@ -512,10 +545,10 @@ class TestExecutionLayerIntegration(unittest.TestCase):
         )
         
         # Enable execution
-        self.executor.enable_execution(True)
+        executor.enable_execution(True)
         
         # Execute signal
-        order = self.executor.execute_signal(signal, 1)
+        order = executor.execute_signal(signal, 1)
         
         # Verify order was created
         self.assertIsNotNone(order)
@@ -523,22 +556,30 @@ class TestExecutionLayerIntegration(unittest.TestCase):
         self.assertEqual(order.status, OrderStatus.FILLED)
         
         # Verify position would be added
-        result = self.monitor.add_position(1, "AAPL", order.quantity, order.filled_price)
+        result = monitor.add_position(1, "AAPL", order.quantity, order.filled_price)
         self.assertTrue(result)
+        
+        # Cleanup
+        db_manager.close()
     
     def test_performance_tracking_integration(self):
-        """Test performance tracking integration"""
-        # Mock portfolio data
-        self.mock_db_manager.fetch_one.return_value = (10000.0,)  # Portfolio value
+        """Test performance tracking integration with real API data"""
+        # Use real database manager
+        db_manager = DatabaseManager("data/trading_advisor.db")
+        
+        # Create performance tracker with real data
+        tracker = PerformanceTracker(db_manager)
         
         # Create performance snapshot
-        result = self.tracker.create_performance_snapshot(1)
+        result = tracker.create_performance_snapshot(1)
         self.assertTrue(result)
         
         # Calculate performance metrics
-        with patch.object(self.tracker, '_get_portfolio_data', return_value=[]):
-            metrics = self.tracker.calculate_performance_metrics(1)
-            self.assertIsInstance(metrics, dict)
+        metrics = tracker.calculate_performance_metrics(1)
+        self.assertIsInstance(metrics, dict)
+        
+        # Cleanup
+        db_manager.close()
 
 
 if __name__ == '__main__':

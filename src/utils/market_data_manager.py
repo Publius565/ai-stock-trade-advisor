@@ -75,6 +75,12 @@ class MarketDataManager(BaseDatabaseManager):
         results = self.execute_query(query, (symbol,))
         return results[0] if results else None
     
+    def get_symbol_id(self, symbol: str) -> Optional[int]:
+        """Get symbol ID by symbol string."""
+        query = "SELECT id FROM symbols WHERE symbol = ?"
+        results = self.execute_query(query, (symbol,))
+        return results[0]['id'] if results else None
+    
     def store_market_data(self, symbol: str, data_points: List[Dict[str, Any]]) -> bool:
         """
         Store market data for a symbol.

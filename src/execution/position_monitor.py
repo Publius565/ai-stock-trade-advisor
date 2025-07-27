@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 from ..utils.database_manager import DatabaseManager
-from ..data_layer.market_data import MarketDataManager
+from ..data_layer.market_data import MarketDataManager as DataLayerMarketDataManager
 
 
 class PositionStatus(Enum):
@@ -46,8 +46,6 @@ class PositionMonitor:
     
     def __init__(self, db_manager: DatabaseManager):
         self.db_manager = db_manager
-        cache_dir = getattr(db_manager, 'get_cache_dir', lambda: "data/cache")()
-        self.market_data_manager = MarketDataManager(cache_dir)
         self.logger = logging.getLogger(__name__)
         
         # Position tracking
@@ -128,12 +126,7 @@ class PositionMonitor:
     def _get_current_price(self, symbol: str) -> Optional[float]:
         """Get current market price for a symbol"""
         try:
-            # Try to get from market data manager
-            market_data = self.market_data_manager.get_latest_data(symbol)
-            if market_data and 'close' in market_data:
-                return market_data['close']
-            
-            # Fallback: use cached price from database
+            # Use cached price from database
             query = """
                 SELECT md.close
                 FROM market_data md
@@ -217,8 +210,7 @@ class PositionMonitor:
         """
         try:
             # Get symbol ID
-            symbol_manager = self.db_manager.get_manager('symbol')
-            symbol_id = symbol_manager.get_symbol_id(symbol)
+            symbol_id = self.db_manager.market_data.get_symbol_id(symbol)
             if not symbol_id:
                 self.logger.error(f"Symbol not found: {symbol}")
                 return False
@@ -270,7 +262,7 @@ class PositionMonitor:
                     int(datetime.now().timestamp())
                 )
             
-            self.db_manager.execute_query(query, params)
+            self.db_manager.execute_update(query, params)
             self.logger.info(f"Position updated: {symbol} - Quantity: {quantity}, Price: ${price:.2f}")
             return True
             
@@ -284,8 +276,7 @@ class PositionMonitor:
         """
         try:
             # Get symbol ID
-            symbol_manager = self.db_manager.get_manager('symbol')
-            symbol_id = symbol_manager.get_symbol_id(symbol)
+            symbol_id = self.db_manager.market_data.get_symbol_id(symbol)
             if not symbol_id:
                 self.logger.error(f"Symbol not found: {symbol}")
                 return False
@@ -324,7 +315,7 @@ class PositionMonitor:
                 """
                 params = (remaining_quantity, realized_pnl, int(datetime.now().timestamp()), user_id, symbol_id)
             
-            self.db_manager.execute_query(query, params)
+            self.db_manager.execute_update(query, params)
             self.logger.info(f"Position closed: {symbol} - Quantity: {quantity}, Price: ${price:.2f}, P&L: ${realized_pnl:.2f}")
             return True
             

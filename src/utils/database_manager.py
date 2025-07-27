@@ -119,4 +119,32 @@ class DatabaseManager:
     def get_portfolio_summary(self, user_uid: str):
         """Get portfolio summary - delegates to SignalManager."""
         return self.signals.get_portfolio_summary(user_uid)
+    
+    # Database operations (delegate to base managers)
+    def execute_query(self, query: str, params: tuple = None):
+        """Execute query - delegates to base manager."""
+        return self.market_data.execute_query(query, params)
+    
+    def execute_update(self, query: str, params: tuple = None):
+        """Execute update - delegates to base manager."""
+        if params is None:
+            params = ()
+        return self.market_data.execute_update(query, params)
+    
+    def fetch_one(self, query: str, params: tuple = None):
+        """Fetch one result - delegates to base manager."""
+        if params is None:
+            params = ()
+        results = self.market_data.execute_query(query, params)
+        if results:
+            # Return the first row as a tuple (for backward compatibility)
+            first_row = results[0]
+            return tuple(first_row.values())
+        return None
+    
+    def fetch_all(self, query: str, params: tuple = None):
+        """Fetch all results - delegates to base manager."""
+        if params is None:
+            params = ()
+        return self.market_data.execute_query(query, params)
  
