@@ -13,6 +13,8 @@ from .trading_signals_tab import TradingSignalsTab
 from .execution_tab import ExecutionTab
 from .positions_tab import PositionsTab
 from .performance_tab import PerformanceTab
+from .portfolio_analytics_tab import PortfolioAnalyticsTab
+from .backtesting_tab import BacktestingTab
 
 __all__ = [
     'ProfileTab',
@@ -23,5 +25,7 @@ __all__ = [
     'TradingSignalsTab',
     'ExecutionTab',
     'PositionsTab',
-    'PerformanceTab'
+    'PerformanceTab',
+    'PortfolioAnalyticsTab',
+    'BacktestingTab'
 ] 
