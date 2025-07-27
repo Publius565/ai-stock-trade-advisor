@@ -11,7 +11,7 @@ import logging
 from datetime import datetime, timedelta
 import numpy as np
 
-from ..execution import PortfolioAnalytics, RiskManager, RiskLevel, PositionRisk, PortfolioRisk
+from src.execution import PortfolioAnalytics, RiskManager, RiskLevel, PositionRisk, PortfolioRisk
 
 logger = logging.getLogger(__name__)
 

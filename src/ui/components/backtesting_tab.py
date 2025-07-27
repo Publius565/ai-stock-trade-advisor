@@ -11,7 +11,7 @@ import logging
 from datetime import datetime, timedelta
 import numpy as np
 
-from ..execution import BacktestingEngine, BacktestResult, RiskLevel
+from src.execution import BacktestingEngine, BacktestResult, RiskLevel
 
 logger = logging.getLogger(__name__)
 
