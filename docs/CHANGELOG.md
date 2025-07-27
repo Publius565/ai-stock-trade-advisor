@@ -5,6 +5,68 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.11] - 2025-07-26 - Project Cleanup and Optimization
+
+### Removed
+- **Cache Directories**: Removed all `__pycache__` directories and `.pytest_cache` for cleaner project structure
+- **Empty Directories**: Removed empty `examples/` and `resources/` directories that served no purpose
+- **Duplicate ML Models**: Removed older ML model files (20:57:12 versions) keeping only current versions (20:58:02)
+- **Test Cache**: Removed empty `data/test_cache/` directory
+
+### Technical Improvements
+- **Project Structure**: Cleaner directory structure with reduced clutter
+- **Storage Optimization**: Removed approximately 8MB of duplicate and unnecessary files
+- **Maintenance**: Improved project maintainability by removing orphaned files
+- **Rule Compliance**: Maintained compliance with Rule 2.3 (files under 1500 lines)
+
+### Status
+- ✅ Project structure cleaned and optimized
+- ✅ All essential files preserved (current ML models, active databases, core code)
+- ✅ No functionality lost during cleanup
+- ✅ Ready for continued development with cleaner codebase
+
+## [0.4.10] - 2025-07-26 - SignalGenerator Method Fix
+
+### Fixed
+- **SignalGenerator Error**: Fixed `'MarketDataManager' object has no attribute 'get_symbol_data'` error
+- **TradingEngine Error**: Fixed same method call issue in TradingEngine's signal generation
+- **Method Name Mismatch**: Corrected `get_symbol_data()` calls to use proper `get_market_data()` method
+- **Signal Generation**: SignalGenerator and TradingEngine now properly retrieve market data for signal generation
+
+### Technical Improvements
+- **Method Alignment**: Aligned method calls with actual MarketDataManager API
+- **Error Resolution**: Eliminated AttributeError that was preventing signal generation
+- **Component Integration**: Fixed integration between SignalGenerator, TradingEngine, and MarketDataManager
+- **Signal Processing**: Restored full signal generation capability for trading suggestions
+
+### Status
+- ✅ SignalGenerator properly retrieves market data for signal generation
+- ✅ TradingEngine successfully generates signals without method errors
+- ✅ All trading components properly integrated with market data system
+- ✅ Signal generation working seamlessly for AAPL and other symbols
+
+## [0.4.9] - 2025-07-26 - SignalGenerator Initialization Fixes
+
+### Fixed
+- **SignalGenerator Warning**: Resolved "SignalGenerator not available for AAPL" warning by fixing dependency injection
+- **TradeSuggestionEngine Initialization**: Fixed proper initialization order to ensure SignalGenerator is available
+- **TradingEngine Constructor**: Fixed constructor calls to pass both db_manager and profile_manager as required
+- **Component Initialization Order**: Improved initialization sequence to prevent dependency issues
+- **Duplicate Initialization**: Reduced duplicate component initialization warnings in logs
+
+### Technical Improvements
+- **Dependency Injection**: Proper SignalGenerator setup in both ML Predictions and Trading Signals tabs
+- **Initialization Sequence**: Components now initialize in correct order with proper dependencies
+- **Error Handling**: Enhanced error handling for missing dependencies with informative warnings
+- **Component Communication**: Improved communication between UI components and backend systems
+
+### Status
+- ✅ SignalGenerator properly initialized and available for trade suggestions
+- ✅ TradeSuggestionEngine no longer shows "not available" warnings
+- ✅ All trading components properly connected with correct dependencies
+- ✅ System initialization clean with minimal duplicate warnings
+- ✅ ML predictions and trading signals working seamlessly
+
 ## [0.4.8] - 2025-07-26 - ML Models Training and UI Fixes
 
 ### Added

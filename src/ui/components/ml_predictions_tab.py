@@ -41,16 +41,8 @@ class MLPredictionsTab(QWidget):
         # Initialize ML components
         try:
             self.prediction_engine = PredictionEngine()
-            # Initialize TradeSuggestionEngine with proper dependencies
-            if db_manager:
-                from src.strategy.trading_engine import TradingEngine
-                trading_engine = TradingEngine(db_manager)
-                self.trade_suggestion_engine = TradeSuggestionEngine(
-                    db_manager=db_manager, 
-                    trading_engine=trading_engine
-                )
-            else:
-                self.trade_suggestion_engine = TradeSuggestionEngine()
+            # Initialize TradeSuggestionEngine without SignalGenerator initially
+            self.trade_suggestion_engine = TradeSuggestionEngine()
             self.feature_engineer = FeatureEngineer()
             logger.info("ML components initialized successfully")
         except Exception as e:
@@ -180,48 +172,42 @@ class MLPredictionsTab(QWidget):
         """Set the market data manager."""
         self.market_data_manager = manager
     
-    def set_profile_manager(self, manager):
-        """Set the profile manager and re-initialize ML components if needed.""" 
-        self.profile_manager = manager
-        
-        # Re-initialize ML components if db_manager is available but trade_suggestion_engine is not
-        if manager and self.db_manager and not self.trade_suggestion_engine:
-            try:
-                from src.strategy.trading_engine import TradingEngine
-                trading_engine = TradingEngine(self.db_manager, manager)
-                self.trade_suggestion_engine = TradeSuggestionEngine(
-                    db_manager=self.db_manager, 
-                    trading_engine=trading_engine
-                )
-                logger.info("ML components re-initialized with profile manager")
-            except Exception as e:
-                logger.error(f"Failed to re-initialize ML components with profile manager: {e}")
-    
     def set_db_manager(self, manager):
-        """Set the database manager and re-initialize ML components."""
+        """Set the database manager."""
         self.db_manager = manager
-        
-        # Re-initialize ML components with proper dependencies
-        if manager and not self.trade_suggestion_engine:
+        # Initialize SignalGenerator if we have all required dependencies
+        self._initialize_signal_generator()
+    
+    def set_profile_manager(self, manager):
+        """Set the profile manager."""
+        self.profile_manager = manager
+    
+    def set_signal_generator(self, signal_generator):
+        """Set the signal generator for the trade suggestion engine."""
+        if self.trade_suggestion_engine and signal_generator:
+            self.trade_suggestion_engine.signal_generator = signal_generator
+            logger.info("SignalGenerator set for TradeSuggestionEngine")
+    
+    def _initialize_signal_generator(self):
+        """Initialize SignalGenerator in TradeSuggestionEngine when dependencies are available."""
+        if (self.db_manager and self.trade_suggestion_engine and 
+            not hasattr(self.trade_suggestion_engine, 'signal_generator') or 
+            self.trade_suggestion_engine.signal_generator is None):
             try:
                 from src.strategy.trading_engine import TradingEngine
                 from src.strategy.signal_generator import SignalGenerator
                 
-                # Note: profile_manager will be set later via set_profile_manager
-                if hasattr(self, 'profile_manager') and self.profile_manager:
-                    trading_engine = TradingEngine(manager, self.profile_manager)
-                    signal_generator = SignalGenerator(manager, trading_engine)
+                if self.profile_manager:
+                    trading_engine = TradingEngine(self.db_manager, self.profile_manager)
+                    signal_generator = SignalGenerator(self.db_manager, trading_engine)
                     
-                    self.trade_suggestion_engine = TradeSuggestionEngine(
-                        db_manager=manager, 
-                        trading_engine=trading_engine,
-                        signal_generator=signal_generator
-                    )
-                    logger.info("ML components re-initialized with database manager and signal generator")
+                    # Update the TradeSuggestionEngine with the SignalGenerator
+                    self.trade_suggestion_engine.signal_generator = signal_generator
+                    logger.info("SignalGenerator initialized for TradeSuggestionEngine")
                 else:
-                    logger.warning("Profile manager not available for ML component initialization")
+                    logger.warning("Profile manager not available for SignalGenerator initialization")
             except Exception as e:
-                logger.error(f"Failed to re-initialize ML components: {e}")
+                logger.warning(f"Could not initialize SignalGenerator: {e}")
     
     def set_current_user(self, user_uid: str):
         """Set the current user UID."""

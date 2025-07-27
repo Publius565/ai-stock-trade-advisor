@@ -76,7 +76,7 @@ class SignalGenerator:
         """
         try:
             # Get market data
-            market_data = self.market_data_manager.get_symbol_data(symbol)
+            market_data = self.market_data_manager.get_market_data(symbol)
             if not market_data:
                 self.logger.warning(f"No market data available for {symbol}")
                 return None

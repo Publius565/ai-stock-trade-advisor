@@ -1,18 +1,30 @@
 # Modular Architecture Refactoring Plan
-*AI-Driven Stock Trade Advisor - Version 0.4.3*
+*AI-Driven Stock Trade Advisor - Version 0.4.10*
 
 ## Overview
 This document outlines specific refactoring recommendations to further optimize the project's modular architecture, following Rule 2.3 and best practices for maintainable code.
 
-## Current Status ✅
+## Current Status Analysis ✅
 - **All files under 1500-line threshold** (Rule 2.3 compliant)
 - **Excellent modular architecture** with clear layer separation
 - **Recent UI refactoring success**: 1022 → 350 lines through component modularization
 - **Database integrity verified**: 17 tables with proper structure
 
-## Refactoring Priorities
+## Current File Size Analysis (Largest Files)
+1. **market_data_manager.py** - 596 lines (CRITICAL: Multiple responsibilities)
+2. **rules_engine.py** - 427 lines (MODERATE: Could benefit from strategy pattern)
+3. **trade_executor.py** - 427 lines (MODERATE: Good structure, minor improvements)
+4. **main_window.py** - 423 lines (GOOD: Already refactored from 1022 lines)
+5. **trading_signals_tab.py** - 409 lines (MODERATE: UI component could be split)
+6. **data_validator.py** - 388 lines (MODERATE: Validation strategies)
+7. **streaming_data.py** - 385 lines (MODERATE: Good structure)
+8. **signal_manager.py** - 382 lines (MODERATE: Good structure)
+9. **signal_generator.py** - 375 lines (MODERATE: Good structure)
+10. **market_data.py** - 325 lines (GOOD: Well-structured)
 
-### 1. MarketDataManager Decomposition (596 lines)
+## Priority Refactoring Targets
+
+### 1. MarketDataManager Decomposition (596 lines) - HIGH PRIORITY
 **Problem**: Single class with multiple responsibilities violates SRP
 
 **Current Structure**:
@@ -70,7 +82,7 @@ class NewsManager(BaseDatabaseManager):
 - Clearer responsibilities
 - Easier to extend individual components
 
-### 2. Market Scanner Strategy Pattern (582 lines)
+### 2. Market Scanner Strategy Pattern (589 lines) - MEDIUM PRIORITY
 **Problem**: Multiple scanning strategies in single class
 
 **Current Structure**:
@@ -113,25 +125,100 @@ class MarketScanner:
         return self.strategies[strategy_name].scan(**kwargs)
 ```
 
-### 3. Profile Manager Enhancement (502 lines)
+### 3. Rules Engine Strategy Pattern (435 lines) - MEDIUM PRIORITY
+**Problem**: Multiple rule evaluation strategies in single class
+
+**Current Structure**:
+```python
+class RulesEngine:
+    - _evaluate_technical_indicator()
+    - _evaluate_sma_crossover()
+    - _evaluate_ema_crossover()
+    - _evaluate_volume_analysis()
+    - _evaluate_momentum_analysis()
+    - _evaluate_risk_management()
+```
+
+**Recommended Strategy Pattern**:
+```python
+class RuleEvaluator(ABC):
+    @abstractmethod
+    def evaluate(self, rule: TradingRule, market_data: Dict) -> Optional[Dict]:
+        pass
+
+class TechnicalIndicatorEvaluator(RuleEvaluator):
+    def evaluate(self, rule: TradingRule, market_data: Dict) -> Optional[Dict]:
+        # Technical indicator logic
+
+class VolumeAnalysisEvaluator(RuleEvaluator):
+    def evaluate(self, rule: TradingRule, market_data: Dict) -> Optional[Dict]:
+        # Volume analysis logic
+
+class MomentumAnalysisEvaluator(RuleEvaluator):
+    def evaluate(self, rule: TradingRule, market_data: Dict) -> Optional[Dict]:
+        # Momentum analysis logic
+
+class RiskManagementEvaluator(RuleEvaluator):
+    def evaluate(self, rule: TradingRule, market_data: Dict) -> Optional[Dict]:
+        # Risk management logic
+```
+
+### 4. Data Validator Strategy Pattern (388 lines) - LOW PRIORITY
+**Problem**: Multiple validation strategies in single class
+
 **Recommended Split**:
 ```python
-class UserProfileManager(BaseDatabaseManager):
-    # Core profile operations
-    - create_user_profile()
-    - get_user_profile()
-    - update_risk_profile()
+class ValidationStrategy(ABC):
+    @abstractmethod
+    def validate(self, data: Any) -> Tuple[bool, List[str]]:
+        pass
 
-class UserPreferencesManager(BaseDatabaseManager):
-    # Preferences and settings
-    - get_user_preferences()
-    - update_preferences()
-    - manage_notifications()
+class MarketDataValidator(ValidationStrategy):
+    def validate(self, data: Dict) -> Tuple[bool, List[str]]:
+        # Market data validation
+
+class SignalValidator(ValidationStrategy):
+    def validate(self, data: Dict) -> Tuple[bool, List[str]]:
+        # Signal validation
+
+class UserDataValidator(ValidationStrategy):
+    def validate(self, data: Dict) -> Tuple[bool, List[str]]:
+        # User data validation
+```
+
+### 5. UI Component Optimization (409 lines) - LOW PRIORITY
+**Problem**: Large UI component with multiple responsibilities
+
+**Current Structure**:
+```python
+class TradingSignalsTab:
+    # Signal display
+    # Signal filtering
+    # Signal actions
+    # Chart integration
+```
+
+**Recommended Split**:
+```python
+class SignalDisplayComponent:
+    # Signal display logic only
+
+class SignalFilterComponent:
+    # Signal filtering logic only
+
+class SignalActionComponent:
+    # Signal action logic only
+
+class TradingSignalsTab:
+    def __init__(self):
+        self.display = SignalDisplayComponent()
+        self.filter = SignalFilterComponent()
+        self.actions = SignalActionComponent()
 ```
 
 ## Implementation Timeline
 
-### Phase 1 (Week 1): Database Managers Split
+### Phase 1 (Week 1): Database Managers Split - HIGH PRIORITY
 - [ ] Create SymbolManager class
 - [ ] Create MarketDataStorage class  
 - [ ] Create IndicatorManager class
@@ -150,11 +237,23 @@ class UserPreferencesManager(BaseDatabaseManager):
 - [ ] Refactor MarketScanner to use strategies
 - [ ] Update UI components
 
-### Phase 4 (Week 4): Profile Manager Split
-- [ ] Split ProfileManager functionality
-- [ ] Create UserPreferencesManager
-- [ ] Update dependencies
-- [ ] Final integration testing
+### Phase 4 (Week 4): Rules Engine Strategy Pattern
+- [ ] Implement rule evaluation strategy interface
+- [ ] Create specialized evaluator classes
+- [ ] Refactor RulesEngine to use strategies
+- [ ] Update tests
+
+### Phase 5 (Week 5): Data Validator Strategy Pattern
+- [ ] Implement validation strategy interface
+- [ ] Create specialized validator classes
+- [ ] Refactor DataValidator to use strategies
+- [ ] Update tests
+
+### Phase 6 (Week 6): UI Component Optimization
+- [ ] Split TradingSignalsTab into components
+- [ ] Create specialized UI components
+- [ ] Update main window integration
+- [ ] Update tests
 
 ## Validation Criteria
 - ✅ All classes under 300 lines
@@ -173,4 +272,42 @@ class UserPreferencesManager(BaseDatabaseManager):
 - Reduced class complexity (lines per class)
 - Improved test coverage and maintainability
 - Better separation of concerns
-- Enhanced developer productivity 
+- Enhanced developer productivity
+
+## Architecture Benefits
+
+### Before Refactoring
+- MarketDataManager: 596 lines (6 responsibilities)
+- MarketScanner: 589 lines (3 scanning strategies)
+- RulesEngine: 435 lines (5 evaluation strategies)
+
+### After Refactoring
+- SymbolManager: ~120 lines (1 responsibility)
+- MarketDataStorage: ~100 lines (1 responsibility)
+- IndicatorManager: ~100 lines (1 responsibility)
+- WatchlistManager: ~150 lines (1 responsibility)
+- NewsManager: ~100 lines (1 responsibility)
+- TopMoversScanner: ~150 lines (1 strategy)
+- WatchlistScanner: ~150 lines (1 strategy)
+- NewsScanner: ~150 lines (1 strategy)
+- TechnicalIndicatorEvaluator: ~100 lines (1 strategy)
+- VolumeAnalysisEvaluator: ~100 lines (1 strategy)
+- MomentumAnalysisEvaluator: ~100 lines (1 strategy)
+- RiskManagementEvaluator: ~100 lines (1 strategy)
+
+## Code Quality Improvements
+1. **Single Responsibility Principle**: Each class has one clear purpose
+2. **Open/Closed Principle**: Easy to add new strategies without modifying existing code
+3. **Dependency Inversion**: High-level modules depend on abstractions
+4. **Testability**: Smaller, focused classes are easier to test
+5. **Maintainability**: Changes to one responsibility don't affect others
+6. **Extensibility**: New features can be added as new strategies
+
+## Testing Strategy
+- Unit tests for each new manager class
+- Integration tests for strategy pattern implementations
+- Regression tests to ensure existing functionality works
+- Performance tests to ensure no degradation
+- Mock tests for external dependencies
+
+This refactoring plan will significantly improve the project's modular architecture while maintaining all existing functionality and improving code quality. 

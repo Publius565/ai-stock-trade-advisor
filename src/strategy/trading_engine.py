@@ -98,7 +98,7 @@ class TradingEngine:
         for symbol in symbols:
             try:
                 # Get market data
-                market_data = self.market_data_manager.get_symbol_data(symbol)
+                market_data = self.market_data_manager.get_market_data(symbol)
                 if not market_data:
                     continue
                 

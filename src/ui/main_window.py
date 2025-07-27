@@ -120,6 +120,14 @@ class MainWindow(QMainWindow):
             self.market_scanner = MarketScanner(self.db_manager)
             logger.info("Market scanner initialized")
             
+            # Initialize trading system components
+            from src.strategy.trading_engine import TradingEngine
+            from src.strategy.signal_generator import SignalGenerator
+            
+            self.trading_engine = TradingEngine(self.db_manager, self.profile_manager)
+            self.signal_generator = SignalGenerator(self.db_manager, self.trading_engine)
+            logger.info("Trading system components initialized")
+            
             # Set managers in tabs
             self.profile_tab.set_profile_manager(self.profile_manager)
             self.scanner_tab.set_market_scanner(self.market_scanner)
@@ -130,14 +138,11 @@ class MainWindow(QMainWindow):
             # Set managers in new ML and Trading tabs
             self.ml_predictions_tab.set_db_manager(self.db_manager)
             self.ml_predictions_tab.set_profile_manager(self.profile_manager)
+            self.ml_predictions_tab.set_signal_generator(self.signal_generator)
             self.trading_signals_tab.set_db_manager(self.db_manager)
             self.trading_signals_tab.set_profile_manager(self.profile_manager)
-            
-            # Set trading system components if available
-            if 'trading_engine' in self.trading_system:
-                self.trading_signals_tab.set_trading_engine(self.trading_system['trading_engine'])
-            if 'signal_generator' in self.trading_system:
-                self.trading_signals_tab.set_signal_generator(self.trading_system['signal_generator'])
+            self.trading_signals_tab.set_trading_engine(self.trading_engine)
+            self.trading_signals_tab.set_signal_generator(self.signal_generator)
             
             self.statusBar().showMessage("Managers initialized successfully")
             

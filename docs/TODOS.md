@@ -27,6 +27,9 @@
 - [x] **NEW**: Train ML models with realistic sample data (R² up to 0.54)
 - [x] **NEW**: Fix prediction display errors and null value handling
 - [x] **NEW**: Resolve SignalGenerator initialization issues
+- [x] **NEW**: Fix TradeSuggestionEngine dependency injection and initialization order
+- [x] **NEW**: Resolve "SignalGenerator not available" warnings in trade suggestions
+- [x] **NEW**: Fix SignalGenerator method call errors (get_symbol_data → get_market_data)
 
 ### Phase 4A: Execution Layer Foundation
 - [x] Implement TradeExecutor with order management
@@ -82,6 +85,42 @@
 - [ ] Implement social features and community tools
 
 ## Technical Debt and Improvements
+- [x] **COMPLETED**: Project cleanup and optimization (2025-07-26)
+  - [x] Removed all `__pycache__` directories and `.pytest_cache`
+  - [x] Removed empty `examples/` and `resources/` directories
+  - [x] Removed duplicate ML model files (older versions)
+  - [x] Removed empty `data/test_cache/` directory
+  - [x] Updated documentation and Git repository
+- [ ] **HIGH PRIORITY**: Refactor MarketDataManager (596 lines) into specialized managers
+  - [ ] Create SymbolManager (~120 lines)
+  - [ ] Create MarketDataStorage (~100 lines)
+  - [ ] Create IndicatorManager (~100 lines)
+  - [ ] Create WatchlistManager (~150 lines)
+  - [ ] Create NewsManager (~100 lines)
+  - [ ] Update DatabaseManager factory pattern
+  - [ ] Update all imports and method calls
+  - [ ] Create comprehensive unit tests for new managers
+- [ ] **MEDIUM PRIORITY**: Implement Strategy Pattern for MarketScanner (589 lines)
+  - [ ] Create ScanningStrategy abstract base class
+  - [ ] Implement TopMoversScanner strategy
+  - [ ] Implement WatchlistScanner strategy
+  - [ ] Implement NewsScanner strategy
+  - [ ] Refactor MarketScanner to use strategy pattern
+- [ ] **MEDIUM PRIORITY**: Implement Strategy Pattern for RulesEngine (435 lines)
+  - [ ] Create RuleEvaluator abstract base class
+  - [ ] Implement TechnicalIndicatorEvaluator strategy
+  - [ ] Implement VolumeAnalysisEvaluator strategy
+  - [ ] Implement MomentumAnalysisEvaluator strategy
+  - [ ] Implement RiskManagementEvaluator strategy
+- [ ] **LOW PRIORITY**: Implement Strategy Pattern for DataValidator (388 lines)
+  - [ ] Create ValidationStrategy abstract base class
+  - [ ] Implement MarketDataValidator strategy
+  - [ ] Implement SignalValidator strategy
+  - [ ] Implement UserDataValidator strategy
+- [ ] **LOW PRIORITY**: Split TradingSignalsTab (409 lines) into components
+  - [ ] Create SignalDisplayComponent
+  - [ ] Create SignalFilterComponent
+  - [ ] Create SignalActionComponent
 - [ ] Optimize database queries for better performance
 - [ ] Implement caching layer for frequently accessed data
 - [ ] Add comprehensive API documentation
