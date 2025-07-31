@@ -70,6 +70,12 @@ class SignalGenerator:
         self.logger.info(f"Generated {len(signals)} signals for watchlist")
         return signals
     
+    def generate_signal(self, symbol: str) -> Optional[TradingSignal]:
+        """
+        Generate a trading signal for a symbol (alias for UI compatibility)
+        """
+        return self.generate_signal_for_symbol(symbol)
+
     def generate_signal_for_symbol(self, symbol: str) -> Optional[TradingSignal]:
         """
         Generate a comprehensive trading signal for a single symbol

@@ -1,0 +1,73 @@
+{
+  "database_schema": {
+    "tables": {
+      "status": "SUCCESS",
+      "tables_found": 17,
+      "all_required_tables": true
+    },
+    "connection": {
+      "status": "SUCCESS",
+      "sqlite_version": "3.45.1",
+      "tables_count": 17,
+      "indexes_count": 68,
+      "foreign_keys_enabled": false
+    }
+  },
+  "user_management": {
+    "crud": {
+      "status": "ERROR",
+      "error": "CHECK constraint failed: risk_profile IN ('conservative', 'moderate', 'aggressive')"
+    },
+    "queries": {
+      "status": "SUCCESS",
+      "total_users": 2,
+      "sample_users": 2,
+      "medium_risk_users": 0
+    }
+  },
+  "market_data_management": {
+    "symbols": {
+      "status": "ERROR",
+      "error": "database is locked"
+    },
+    "market_data": {
+      "status": "ERROR",
+      "error": "database is locked"
+    }
+  },
+  "signal_management": {
+    "crud": {
+      "status": "ERROR",
+      "error": "table signals has no column named symbol"
+    }
+  },
+  "watchlist_management": {
+    "crud": {
+      "status": "ERROR",
+      "error": "database is locked"
+    }
+  },
+  "performance_metrics": {
+    "query_performance": {
+      "status": "SUCCESS",
+      "basic_query_time": 0.0010046958923339844,
+      "join_query_time": 0.0,
+      "complex_query_time": 0.0,
+      "thresholds": {
+        "basic_query": 0.1,
+        "join_query": 0.5,
+        "complex_query": 1.0
+      }
+    }
+  },
+  "data_integrity": {
+    "foreign_keys": {
+      "status": "WARNING",
+      "orphaned_records": 5
+    },
+    "consistency": {
+      "status": "ERROR",
+      "error": "no such column: symbol"
+    }
+  }
+}

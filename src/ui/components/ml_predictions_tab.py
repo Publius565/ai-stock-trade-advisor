@@ -234,25 +234,23 @@ class MLPredictionsTab(QWidget):
             import pandas as pd
             import numpy as np
             
-            # Create sample market data for demonstration
-            dates = pd.date_range(start='2024-01-01', periods=252, freq='D')
-            sample_data = pd.DataFrame({
-                'date': dates,
-                'open': np.random.normal(150, 10, 252),
-                'high': np.random.normal(155, 10, 252),
-                'low': np.random.normal(145, 10, 252),
-                'close': np.random.normal(150, 10, 252),
-                'volume': np.random.normal(1000000, 200000, 252)
-            })
+            # Get real market data for the symbol
+            if not self.market_data_manager:
+                raise ValueError("Market data manager not available")
             
-            # Generate prediction
-            prediction = self.prediction_engine.generate_prediction(symbol, sample_data, horizon)
+            # Fetch real market data
+            market_data = self.market_data_manager.get_market_data(symbol, period='1y')
+            if market_data.empty:
+                raise ValueError(f"No market data available for {symbol}")
+            
+            # Generate prediction with real data
+            prediction = self.prediction_engine.generate_prediction(symbol, market_data, horizon)
             
             # Display prediction summary
             self.display_prediction_summary(symbol, prediction)
             
             # Generate technical indicators summary
-            self.display_technical_indicators(sample_data)
+            self.display_technical_indicators(market_data)
             
             # Update performance metrics
             self.update_performance_metrics()
@@ -280,22 +278,19 @@ class MLPredictionsTab(QWidget):
             # Get user risk profile
             user_profile = self.get_user_risk_profile()
             
-            # Create sample market data
-            import pandas as pd
-            import numpy as np
-            dates = pd.date_range(start='2024-01-01', periods=252, freq='D')
-            sample_data = pd.DataFrame({
-                'date': dates,
-                'open': np.random.normal(150, 10, 252),
-                'high': np.random.normal(155, 10, 252),
-                'low': np.random.normal(145, 10, 252),
-                'close': np.random.normal(150, 10, 252),
-                'volume': np.random.normal(1000000, 200000, 252)
-            })
+            # Get real market data for the symbol
+            if not self.market_data_manager:
+                self.suggestions_table.setRowCount(0)
+                return
             
-            # Generate suggestions
+            market_data = self.market_data_manager.get_market_data(symbol, period='1y')
+            if market_data.empty:
+                self.suggestions_table.setRowCount(0)
+                return
+            
+            # Generate suggestions with real data
             suggestions = self.trade_suggestion_engine.generate_suggestions(
-                symbol, sample_data, user_profile
+                symbol, market_data, user_profile
             )
             
             # Display suggestions in table

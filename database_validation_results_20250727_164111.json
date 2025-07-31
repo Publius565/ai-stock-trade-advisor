@@ -1,0 +1,64 @@
+{
+  "database_schema": {
+    "tables": {
+      "status": "SUCCESS",
+      "tables_found": 17,
+      "all_required_tables": true
+    },
+    "connection": {
+      "status": "SUCCESS",
+      "sqlite_version": "3.45.1",
+      "tables_count": 17,
+      "indexes_count": 68,
+      "foreign_keys_enabled": false
+    }
+  },
+  "user_management": {
+    "crud": {
+      "status": "ERROR",
+      "error": "table users has no column named risk_tolerance"
+    },
+    "queries": {
+      "status": "ERROR",
+      "error": "no such column: risk_tolerance"
+    }
+  },
+  "market_data_management": {
+    "symbols": {
+      "status": "ERROR",
+      "error": "table symbols has no column named company_name"
+    },
+    "market_data": {
+      "status": "ERROR",
+      "error": "table market_data has no column named symbol"
+    }
+  },
+  "signal_management": {
+    "crud": {
+      "status": "ERROR",
+      "error": "table signals has no column named symbol"
+    }
+  },
+  "watchlist_management": {
+    "crud": {
+      "status": "ERROR",
+      "error": "table users has no column named risk_tolerance"
+    }
+  },
+  "performance_metrics": {
+    "query_performance": {
+      "status": "ERROR",
+      "error": "no such column: w.user_uid"
+    }
+  },
+  "data_integrity": {
+    "foreign_keys": {
+      "status": "ERROR",
+      "error": "table watchlist_symbols has no column named watchlist_uid"
+    },
+    "consistency": {
+      "status": "ERROR",
+      "error": "no such column: watchlist_uid"
+    }
+  }
+}

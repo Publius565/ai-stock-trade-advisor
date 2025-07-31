@@ -681,3 +681,56 @@ class PerformanceTracker:
         """Generate monthly performance report"""
         current_month = datetime.now().replace(day=1)
         return self.calculate_performance_metrics(user_id, current_month) 
+
+    def get_performance_snapshot(self, user_id: int) -> Optional[Dict]:
+        """
+        Get a performance snapshot for the UI (wrapper around calculate_performance_metrics)
+        """
+        try:
+            # Calculate comprehensive performance metrics
+            metrics = self.calculate_performance_metrics(user_id)
+            
+            if not metrics:
+                # Return default values if no data available
+                return {
+                    'total_return': 0.0,
+                    'sharpe_ratio': 0.0,
+                    'max_drawdown': 0.0,
+                    'win_rate': 0.0,
+                    'profit_factor': 0.0,
+                    'calmar_ratio': 0.0,
+                    'volatility': 0.0,
+                    'beta': 0.0,
+                    'var_95': 0.0,
+                    'cvar_95': 0.0,
+                    'max_drawdown_duration': 0,
+                    'recovery_time': 0,
+                    'market_correlation': 0.0,
+                    'tracking_error': 0.0,
+                    'last_updated': datetime.now().isoformat()
+                }
+            
+            # Extract and format the metrics for UI consumption
+            snapshot = {
+                'total_return': metrics.get('total_return', 0.0),
+                'sharpe_ratio': metrics.get('sharpe_ratio', 0.0),
+                'max_drawdown': metrics.get('max_drawdown', 0.0),
+                'win_rate': metrics.get('win_rate', 0.0),
+                'profit_factor': metrics.get('profit_factor', 0.0),
+                'calmar_ratio': metrics.get('calmar_ratio', 0.0),
+                'volatility': metrics.get('volatility', 0.0),
+                'beta': metrics.get('beta', 0.0),
+                'var_95': metrics.get('var_95', 0.0),
+                'cvar_95': metrics.get('cvar_95', 0.0),
+                'max_drawdown_duration': metrics.get('max_drawdown_duration', 0),
+                'recovery_time': metrics.get('recovery_time', 0),
+                'market_correlation': metrics.get('market_correlation', 0.0),
+                'tracking_error': metrics.get('tracking_error', 0.0),
+                'last_updated': datetime.now().isoformat()
+            }
+            
+            return snapshot
+            
+        except Exception as e:
+            self.logger.error(f"Error getting performance snapshot: {e}")
+            return None 

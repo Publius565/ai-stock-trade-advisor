@@ -31,14 +31,27 @@ class TestModelManager(unittest.TestCase):
         self.temp_dir = tempfile.mkdtemp()
         self.model_manager = ModelManager(models_dir=self.temp_dir)
         
-        # Create sample data
+        # Create realistic market data for testing
         np.random.seed(42)
+        dates = pd.date_range(start='2023-01-01', periods=100, freq='D')
+        
+        # Generate realistic OHLCV data
+        base_price = 100.0
+        returns = np.random.normal(0.001, 0.02, 100)
+        prices = base_price * np.exp(np.cumsum(returns))
+        
         self.sample_data = pd.DataFrame({
-            'feature1': np.random.randn(100),
-            'feature2': np.random.randn(100),
-            'feature3': np.random.randn(100)
+            'date': dates,
+            'open': prices * (1 + np.random.normal(0, 0.005, 100)),
+            'high': prices * (1 + np.abs(np.random.normal(0, 0.01, 100))),
+            'low': prices * (1 - np.abs(np.random.normal(0, 0.01, 100))),
+            'close': prices,
+            'volume': np.random.lognormal(12, 0.5, 100)
         })
-        self.sample_target = pd.Series(np.random.randn(100))
+        
+        # Create target variable (future returns)
+        self.sample_target = self.sample_data['close'].pct_change(5).shift(-5).dropna()
+        self.sample_data = self.sample_data.iloc[:-5]  # Remove last 5 rows to match target
     
     def tearDown(self):
         """Clean up test fixtures."""

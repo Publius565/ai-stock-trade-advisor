@@ -250,6 +250,38 @@ class ProfileManager:
             logger.error(f"Failed to add symbol to watchlist: {e}")
             return False
     
+    def get_user_watchlist(self, user_uid: str) -> List[Dict[str, Any]]:
+        """
+        Get a flat list of all symbols from user's watchlists (singular method for UI)
+        
+        Args:
+            user_uid: User UID
+            
+        Returns:
+            Flat list of symbol dictionaries from all user watchlists
+        """
+        try:
+            # Get all user watchlists
+            watchlists = self.get_user_watchlists(user_uid)
+            
+            # Flatten all symbols from all watchlists
+            all_symbols = []
+            for watchlist in watchlists:
+                symbols = watchlist.get('symbols', [])
+                for symbol in symbols:
+                    # Ensure symbol has required format
+                    if isinstance(symbol, dict) and 'symbol' in symbol:
+                        all_symbols.append(symbol)
+                    elif isinstance(symbol, str):
+                        # Convert string to dict format
+                        all_symbols.append({'symbol': symbol})
+            
+            return all_symbols
+            
+        except Exception as e:
+            logger.error(f"Failed to get user watchlist: {e}")
+            return []
+
     def get_user_watchlists(self, user_uid: str) -> List[Dict[str, Any]]:
         """
         Get all watchlists for user with symbols included.

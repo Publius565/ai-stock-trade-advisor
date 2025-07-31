@@ -1,0 +1,49 @@
+{
+  "api_connections": {
+    "yahoo_finance": {
+      "status": "FAILED",
+      "error": "HTTP 429"
+    },
+    "alpha_vantage": {
+      "status": "NOT_CONFIGURED",
+      "note": "API key required"
+    },
+    "alpaca": {
+      "status": "NOT_CONFIGURED",
+      "note": "API credentials required"
+    }
+  },
+  "database_operations": {
+    "connection": {
+      "status": "SUCCESS",
+      "tables_found": 17,
+      "all_required_tables": true
+    },
+    "crud": {
+      "status": "SUCCESS",
+      "operations": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ]
+    }
+  },
+  "data_flow": {
+    "api_to_database": {
+      "status": "FAILED",
+      "error": "HTTP 429"
+    }
+  },
+  "performance_metrics": {
+    "api_response_time": {
+      "status": "FAILED",
+      "error": "HTTP 429"
+    },
+    "database_query_time": {
+      "status": "SUCCESS",
+      "query_time": 0.0015034675598144531,
+      "threshold": 1.0
+    }
+  }
+}

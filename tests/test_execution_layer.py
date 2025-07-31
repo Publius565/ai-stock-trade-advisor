@@ -13,7 +13,7 @@ from unittest.mock import Mock, patch, MagicMock
 # Add src to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from src.execution.trade_executor import TradeExecutor, MockBroker, TradeOrder, OrderType, OrderStatus
+from src.execution.trade_executor import TradeExecutor, TradeOrder, OrderType, OrderStatus
 from src.execution.position_monitor import PositionMonitor, Position, PositionStatus
 from src.execution.performance_tracker import PerformanceTracker, PerformanceSnapshot, PerformanceMetric
 from src.strategy.trading_engine import TradingSignal, SignalType, SignalStrength
@@ -21,65 +21,7 @@ from src.utils.database_manager import DatabaseManager
 from src.profile.profile_manager import ProfileManager
 
 
-class TestMockBroker(unittest.TestCase):
-    """Test MockBroker functionality"""
-    
-    def setUp(self):
-        self.broker = MockBroker()
-        self.test_order = TradeOrder(
-            uid="test-uid",
-            user_id=1,
-            symbol="AAPL",
-            order_type=OrderType.MARKET,
-            quantity=100,
-            price=150.0,
-            created_at=datetime.now()
-        )
-    
-    def test_broker_initialization(self):
-        """Test broker initialization"""
-        self.assertEqual(self.broker.commission_rate, 0.005)
-        self.assertEqual(self.broker.min_commission, 1.0)
-    
-    def test_market_order_execution(self):
-        """Test market order execution"""
-        result = self.broker.place_order(self.test_order)
-        
-        self.assertTrue(result)
-        self.assertEqual(self.test_order.status, OrderStatus.FILLED)
-        self.assertEqual(self.test_order.filled_quantity, 100)
-        self.assertEqual(self.test_order.filled_price, 150.0)
-        self.assertIsNotNone(self.test_order.filled_at)
-        self.assertGreater(self.test_order.commission, 0)
-    
-    def test_limit_order_execution(self):
-        """Test limit order execution"""
-        limit_order = TradeOrder(
-            uid="limit-uid",
-            user_id=1,
-            symbol="AAPL",
-            order_type=OrderType.LIMIT,
-            quantity=100,
-            price=145.0,  # Price <= limit_price for immediate fill
-            limit_price=145.0,
-            created_at=datetime.now()
-        )
-        
-        result = self.broker.place_order(limit_order)
-        
-        self.assertTrue(result)
-        self.assertEqual(limit_order.status, OrderStatus.FILLED)
-        self.assertEqual(limit_order.filled_price, 145.0)
-    
-    def test_order_cancellation(self):
-        """Test order cancellation"""
-        result = self.broker.cancel_order("test-uid")
-        self.assertTrue(result)
-    
-    def test_order_status_check(self):
-        """Test order status retrieval"""
-        status = self.broker.get_order_status("test-uid")
-        self.assertEqual(status, OrderStatus.FILLED)
+# MockBroker tests removed - System now uses real API data only
 
 
 class TestTradeExecutor(unittest.TestCase):

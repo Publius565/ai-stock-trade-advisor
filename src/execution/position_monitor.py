@@ -88,6 +88,40 @@ class PositionMonitor:
             self.logger.error(f"Error updating positions: {e}")
             return False
     
+    def get_user_positions(self, user_id: int) -> List[Dict]:
+        """
+        Get all positions for a user (public method for UI)
+        """
+        try:
+            # Update positions first to ensure current data
+            self.update_positions(user_id)
+            
+            # Get positions from database
+            positions_data = self._get_user_positions(user_id)
+            
+            # Convert to list of dictionaries with calculated pnl_percentage
+            positions = []
+            for pos_data in positions_data:
+                # Calculate pnl_percentage
+                avg_price = pos_data.get('avg_price', 0)
+                unrealized_pnl = pos_data.get('unrealized_pnl', 0)
+                quantity = pos_data.get('quantity', 0)
+                
+                if avg_price > 0 and quantity > 0:
+                    pnl_percentage = (unrealized_pnl / (avg_price * quantity)) * 100
+                else:
+                    pnl_percentage = 0.0
+                
+                # Add calculated field
+                pos_data['pnl_percentage'] = pnl_percentage
+                positions.append(pos_data)
+            
+            return positions
+            
+        except Exception as e:
+            self.logger.error(f"Error getting user positions: {e}")
+            return []
+
     def _get_user_positions(self, user_id: int) -> List[Dict]:
         """Get all positions for a user from database"""
         try:
@@ -361,8 +395,7 @@ class PositionMonitor:
                     SUM(quantity) as total_shares,
                     SUM(market_value) as total_market_value,
                     SUM(unrealized_pnl) as total_unrealized_pnl,
-                    SUM(realized_pnl) as total_realized_pnl,
-                    AVG(pnl_percentage) as avg_pnl_percentage
+                    SUM(realized_pnl) as total_realized_pnl
                 FROM positions p
                 WHERE p.user_id = ? AND p.quantity > 0
             """
@@ -377,6 +410,13 @@ class PositionMonitor:
             total_realized_pnl = result[4] or 0.0
             total_pnl = total_unrealized_pnl + total_realized_pnl
             
+            # Calculate average P&L percentage manually
+            avg_pnl_percentage = 0.0
+            if total_market_value > 0:
+                cost_basis = total_market_value - total_unrealized_pnl
+                if cost_basis > 0:
+                    avg_pnl_percentage = (total_unrealized_pnl / cost_basis) * 100
+            
             # Get top performers
             top_performers = self._get_top_performers(user_id, limit=5)
             
@@ -390,7 +430,7 @@ class PositionMonitor:
                 'total_unrealized_pnl': total_unrealized_pnl,
                 'total_realized_pnl': total_realized_pnl,
                 'total_pnl': total_pnl,
-                'avg_pnl_percentage': result[5] or 0.0,
+                'avg_pnl_percentage': avg_pnl_percentage,
                 'portfolio_return': (total_pnl / (total_market_value - total_unrealized_pnl)) * 100 if (total_market_value - total_unrealized_pnl) > 0 else 0.0,
                 'top_performers': top_performers,
                 'recent_trades': recent_trades,
@@ -405,7 +445,7 @@ class PositionMonitor:
         """Get top performing positions"""
         try:
             query = """
-                SELECT s.symbol, p.unrealized_pnl, p.pnl_percentage, p.quantity, p.current_price
+                SELECT s.symbol, p.unrealized_pnl, p.quantity, p.current_price, p.avg_price
                 FROM positions p
                 JOIN symbols s ON p.symbol_id = s.id
                 WHERE p.user_id = ? AND p.quantity > 0
@@ -417,12 +457,22 @@ class PositionMonitor:
             performers = []
             
             for row in results:
+                # Calculate pnl_percentage
+                unrealized_pnl = row[1] or 0.0
+                quantity = row[2] or 0
+                avg_price = row[4] or 0.0
+                
+                if avg_price > 0 and quantity > 0:
+                    pnl_percentage = (unrealized_pnl / (avg_price * quantity)) * 100
+                else:
+                    pnl_percentage = 0.0
+                
                 performers.append({
                     'symbol': row[0],
-                    'unrealized_pnl': row[1] or 0.0,
-                    'pnl_percentage': row[2] or 0.0,
-                    'quantity': row[3],
-                    'current_price': row[4] or 0.0
+                    'unrealized_pnl': unrealized_pnl,
+                    'pnl_percentage': pnl_percentage,
+                    'quantity': quantity,
+                    'current_price': row[3] or 0.0
                 })
             
             return performers

@@ -18,57 +18,8 @@ from .trading_types import TradeOrder, OrderType, OrderStatus
 
 
 
-class MockBroker:
-    """Mock broker interface for testing and development"""
-    
-    def __init__(self):
-        self.logger = logging.getLogger(__name__)
-        self.commission_rate = 0.005  # 0.5% commission
-        self.min_commission = 1.0  # $1 minimum commission
-        
-    def place_order(self, order: TradeOrder) -> bool:
-        """Place an order with the mock broker"""
-        try:
-            # Simulate order processing
-            self.logger.info(f"Placing order: {order.symbol} {order.order_type.value} {order.quantity} @ {order.price}")
-            
-            # Simulate market conditions
-            if order.order_type == OrderType.MARKET:
-                # Market orders are filled immediately
-                order.status = OrderStatus.FILLED
-                order.filled_quantity = order.quantity
-                order.filled_price = order.price
-                order.filled_at = datetime.now()
-                order.commission = max(self.min_commission, order.price * order.quantity * self.commission_rate)
-                
-            elif order.order_type == OrderType.LIMIT:
-                # Limit orders are filled if price is favorable
-                if order.price <= order.limit_price:
-                    order.status = OrderStatus.FILLED
-                    order.filled_quantity = order.quantity
-                    order.filled_price = order.limit_price
-                    order.filled_at = datetime.now()
-                    order.commission = max(self.min_commission, order.limit_price * order.quantity * self.commission_rate)
-                else:
-                    order.status = OrderStatus.PENDING
-                    
-            self.logger.info(f"Order {order.uid} status: {order.status.value}")
-            return True
-            
-        except Exception as e:
-            self.logger.error(f"Error placing order: {e}")
-            order.status = OrderStatus.REJECTED
-            return False
-    
-    def cancel_order(self, order_uid: str) -> bool:
-        """Cancel an existing order"""
-        self.logger.info(f"Cancelling order: {order_uid}")
-        return True
-    
-    def get_order_status(self, order_uid: str) -> Optional[OrderStatus]:
-        """Get current order status"""
-        # Mock implementation - in real system would query broker
-        return OrderStatus.FILLED
+# MockBroker removed - System now uses real API data only
+# All trading operations require valid Alpaca API credentials
 
 
 class TradeExecutor:
@@ -108,8 +59,8 @@ class TradeExecutor:
                 from config.config import ALPACA_API_KEY, ALPACA_SECRET_KEY, ALPACA_BASE_URL
                 
                 if not ALPACA_API_KEY or not ALPACA_SECRET_KEY:
-                    self.logger.warning("Alpaca API credentials not found, falling back to MockBroker")
-                    self.broker = MockBroker()
+                    self.logger.error("Alpaca API credentials not found. Trading requires valid API credentials.")
+                    self.broker = None
                     return
                 
                 self.broker = AlpacaBroker(
@@ -120,18 +71,18 @@ class TradeExecutor:
                 )
                 
                 if not self.broker.is_connected():
-                    self.logger.warning("Failed to connect to Alpaca, falling back to MockBroker")
-                    self.broker = MockBroker()
+                    self.logger.error("Failed to connect to Alpaca API. Trading requires valid connection.")
+                    self.broker = None
                 else:
                     self.logger.info("Successfully connected to Alpaca API")
             else:
-                self.broker = MockBroker()
-                self.logger.info("Using MockBroker for testing")
+                self.logger.error("Alpaca API is required for trading. Mock data is not supported.")
+                self.broker = None
                 
         except Exception as e:
             self.logger.error(f"Error initializing broker: {e}")
-            self.broker = MockBroker()
-            self.logger.info("Falling back to MockBroker")
+            self.broker = None
+            self.logger.error("Trading requires valid Alpaca API connection")
     
     def execute_signal(self, signal: TradingSignal, user_id: int) -> Optional[TradeOrder]:
         """

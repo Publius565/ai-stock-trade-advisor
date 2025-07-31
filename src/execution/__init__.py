@@ -5,7 +5,7 @@ This package handles trade execution, position monitoring, performance tracking,
 Part of Phase 4: Execution Layer implementation with Phase 4C: Advanced Portfolio Management
 """
 
-from .trade_executor import TradeExecutor, MockBroker, TradeOrder, OrderType, OrderStatus
+from .trade_executor import TradeExecutor, TradeOrder, OrderType, OrderStatus
 from .position_monitor import PositionMonitor, Position, PositionStatus
 from .performance_tracker import PerformanceTracker, PerformanceSnapshot, PerformanceMetric
 from .portfolio_analytics import PortfolioAnalytics, PortfolioMetrics, RiskMetric
@@ -14,7 +14,7 @@ from .backtesting_engine import BacktestingEngine, BacktestResult, BacktestOrder
 
 __all__ = [
     'TradeExecutor',
-    'MockBroker', 
+    # MockBroker removed - System now uses real API data only 
     'TradeOrder',
     'OrderType',
     'OrderStatus',

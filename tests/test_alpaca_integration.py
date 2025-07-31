@@ -219,8 +219,8 @@ class TestTradeExecutorAlpacaIntegration:
             mock_alpaca_broker.assert_called_once()
     
     @patch('src.execution.trade_executor.AlpacaBroker')
-    def test_fallback_to_mock_broker(self, mock_alpaca_broker, trade_executor):
-        """Test fallback to MockBroker when Alpaca fails"""
+    def test_no_fallback_when_alpaca_fails(self, mock_alpaca_broker, trade_executor):
+        """Test that system fails gracefully when Alpaca API is unavailable"""
         # Mock failed connection
         mock_broker_instance = Mock()
         mock_broker_instance.is_connected.return_value = False
@@ -233,9 +233,8 @@ class TestTradeExecutorAlpacaIntegration:
             
             trade_executor.enable_execution(enabled=True, paper_trading=True, use_alpaca=True)
             
-            # Should fall back to MockBroker
-            assert trade_executor.broker is not None
-            assert hasattr(trade_executor.broker, 'commission_rate')  # MockBroker attribute
+            # Should not have a broker when Alpaca fails
+            assert trade_executor.broker is None
     
     def test_get_broker_info_alpaca(self, trade_executor):
         """Test getting broker info for Alpaca"""
@@ -259,21 +258,15 @@ class TestTradeExecutorAlpacaIntegration:
             assert broker_info['paper_trading'] is True
             assert broker_info['account_info'] is not None
     
-    def test_get_broker_info_mock(self, trade_executor):
-        """Test getting broker info for MockBroker"""
-        # Mock broker (not Alpaca)
-        mock_broker = Mock()
-        mock_broker.commission_rate = 0.005  # MockBroker attribute
+    def test_get_broker_info_no_broker(self, trade_executor):
+        """Test getting broker info when no broker is available"""
+        trade_executor.broker = None
         
-        trade_executor.broker = mock_broker
+        broker_info = trade_executor.get_broker_info()
         
-        # Mock isinstance check to return False (not Alpaca)
-        with patch('src.execution.trade_executor.isinstance', return_value=False):
-            broker_info = trade_executor.get_broker_info()
-            
-            assert broker_info['type'] == 'mock'
-            assert broker_info['connected'] is True
-            assert broker_info['status'] == 'simulation_mode'
+        assert broker_info['type'] == 'none'
+        assert broker_info['connected'] is False
+        assert broker_info['status'] == 'not_available'
     
     def test_get_broker_info_none(self, trade_executor):
         """Test getting broker info when no broker is initialized"""

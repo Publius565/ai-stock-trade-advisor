@@ -242,11 +242,13 @@ class TradingSignalsTab(QWidget):
         
         try:
             # Get signals from signal generator
-            # For POC, we'll simulate signals
-            signals = self.generate_sample_signals()
-            
-            # Display signals in table
-            self.display_signals(signals)
+            # Generate real trading signals using the trading engine
+            if self.trading_engine and self.signal_generator:
+                signals = self.generate_real_signals()
+                self.display_signals(signals)
+            else:
+                self.signals_table.setRowCount(0)
+                logger.warning("Trading engine or signal generator not available")
             
             # Update market context
             self.update_market_context()
@@ -256,29 +258,63 @@ class TradingSignalsTab(QWidget):
         except Exception as e:
             logger.error(f"Error refreshing signals: {e}")
     
-    def generate_sample_signals(self) -> List[Dict]:
-        """Generate sample signals for POC demonstration."""
-        import random
-        from datetime import datetime, timedelta
-        
-        symbols = ["AAPL", "GOOGL", "MSFT", "TSLA", "AMZN", "NVDA", "META"]
-        signal_types = ["BUY", "SELL", "HOLD"]
-        
-        signals = []
-        for i in range(random.randint(3, 8)):
-            signal = {
-                'symbol': random.choice(symbols),
-                'signal_type': random.choice(signal_types),
-                'strength': random.choice(['WEAK', 'MODERATE', 'STRONG']),
-                'confidence': random.uniform(0.6, 0.95),
-                'current_price': random.uniform(100, 300),
-                'target_price': random.uniform(105, 320),
-                'stop_loss': random.uniform(90, 280),
-                'timestamp': datetime.now() - timedelta(minutes=random.randint(1, 120))
-            }
-            signals.append(signal)
-        
-        return signals
+    def generate_real_signals(self) -> List[Dict]:
+        """Generate real trading signals using the trading engine."""
+        try:
+            if not self.trading_engine or not self.signal_generator:
+                return []
+            
+            # Get user's watchlist or default symbols
+            symbols = self.get_user_symbols()
+            if not symbols:
+                symbols = ["AAPL", "GOOGL", "MSFT", "TSLA", "AMZN"]  # Default symbols
+            
+            signals = []
+            for symbol in symbols[:10]:  # Limit to 10 symbols for performance
+                try:
+                    # Generate signal for each symbol
+                    signal = self.signal_generator.generate_signal(symbol)
+                    if signal:
+                        signals.append({
+                            'symbol': symbol,
+                            'signal_type': signal.signal_type.value,
+                            'strength': signal.strength.value,
+                            'confidence': signal.confidence,
+                            'current_price': signal.price,
+                            'target_price': signal.target_price,
+                            'stop_loss': signal.stop_loss,
+                            'timestamp': signal.timestamp
+                        })
+                except Exception as e:
+                    logger.warning(f"Error generating signal for {symbol}: {e}")
+                    continue
+            
+            return signals
+            
+        except Exception as e:
+            logger.error(f"Error generating real signals: {e}")
+            return []
+    
+    def get_user_symbols(self) -> List[str]:
+        """Get symbols from user's watchlist or profile."""
+        try:
+            if self.profile_manager and self.current_user_uid:
+                # Get user's watchlist
+                watchlist = self.profile_manager.get_user_watchlist(self.current_user_uid)
+                if watchlist:
+                    return [item['symbol'] for item in watchlist]
+            
+            # Fallback to market scanner top movers
+            if self.market_data_manager:
+                top_movers = self.market_data_manager.get_top_movers(limit=10)
+                if top_movers:
+                    return [item['symbol'] for item in top_movers]
+            
+            return []
+            
+        except Exception as e:
+            logger.error(f"Error getting user symbols: {e}")
+            return []
     
     def display_signals(self, signals: List[Dict]):
         """Display trading signals in table."""
