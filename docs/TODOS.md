@@ -1,81 +1,18 @@
-# TODOS.md - AI-Driven Stock Trade Advisor
+# Project TODOs
 
-## Project Status: Phase 4C - Advanced Portfolio Management Complete
+This file tracks all planned features and tasks with their completion status.
 
-### ✅ Completed Tasks
+## Critical Issues - COMPLETED ✅
 
-#### Phase 1: Project Foundation
-- [x] Project documentation and planning
-- [x] Architecture design and technology stack selection
-- [x] Development environment setup
-- [x] Git repository initialization and configuration
+### UI-Backend Compatibility Fixes (Version 0.4.17) - COMPLETED
+- [x] Add missing get_user_positions() public method to PositionMonitor class
+- [x] Fix database queries to handle missing pnl_percentage column by calculating in code  
+- [x] Add missing get_performance_snapshot() method to PerformanceTracker class
+- [x] Add missing get_user_watchlist() method to ProfileManager class
+- [x] Add missing generate_signal() alias method to SignalGenerator class
+- [x] Fix get_portfolio_summary() method in PositionMonitor to handle missing columns gracefully
 
-#### Phase 2: Core Infrastructure
-- [x] Database schema design and implementation
-- [x] User profile management system
-- [x] Market scanner with top movers analysis
-- [x] Smart watchlist functionality
-- [x] Modular UI architecture
-- [x] API client for external data providers
-- [x] Data validation and quality assurance
-- [x] Caching system for market data
-- [x] Security framework implementation
-
-#### Phase 3: Trading Engine & ML Components
-- [x] Trading engine with rule-based expert system
-- [x] Rules engine with 5 default trading rules
-- [x] Signal generator with market context analysis
-- [x] Portfolio management with position tracking
-- [x] Machine learning model management
-- [x] Feature engineering with 40+ technical indicators
-- [x] Prediction engine with multi-model aggregation
-- [x] Trade suggestion engine with risk assessment
-- [x] ML model training and persistence
-- [x] Model performance tracking and validation
-
-#### Phase 4A: Execution Layer Foundation
-- [x] Trade execution engine
-- [x] Position monitoring system
-- [x] Performance tracking and analytics
-- [x] Order management system
-- [x] MockBroker for testing (DEPRECATED - Now using real API data only)
-
-#### Phase 4B: Alpaca Broker Integration
-- [x] Alpaca Trading API integration
-- [x] Real-time market data streaming
-- [x] Paper trading environment setup
-- [x] Order placement and management
-- [x] Position tracking and P&L calculation
-- [x] Account management and balance tracking
-- [x] Fallback system for API failures
-- [x] UI integration for execution layer
-
-#### Phase 4C: Advanced Portfolio Management
-- [x] Portfolio analytics with advanced metrics
-- [x] Risk management system with position sizing
-- [x] Backtesting framework with multiple strategies
-- [x] Performance reporting and visualization
-- [x] Sector exposure analysis
-- [x] Risk-adjusted return calculations
-- [x] UI integration for portfolio management
-
-#### System Validation & Testing
-- [x] Comprehensive test suite (214 tests)
-- [x] Database integrity verification
-- [x] Component integration testing
-- [x] API validation and error handling
-- [x] UI component testing
-- [x] Performance optimization
-- [x] Security validation
-
-#### Documentation & Maintenance
-- [x] Comprehensive technical documentation
-- [x] User guides and tutorials
-- [x] API documentation
-- [x] Deployment guides
-- [x] Security best practices
-- [x] Performance monitoring
-- [x] Error handling and logging
+## High Priority Tasks
 
 ### 🔄 In Progress Tasks
 
