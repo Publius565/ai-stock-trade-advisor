@@ -135,6 +135,12 @@ class MainWindow(QMainWindow):
             self.market_scanner = MarketScanner(self.db_manager)
             logger.info("Market scanner initialized")
             
+            # Initialize market data layer manager for API data fetching
+            from src.data_layer.market_data import MarketDataManager
+            cache_dir = getattr(self.db_manager, 'get_cache_dir', lambda: "data/cache")()
+            self.market_data_layer = MarketDataManager(cache_dir)
+            logger.info("Market data layer manager initialized")
+            
             # Initialize trading system components
             from src.strategy.trading_engine import TradingEngine
             from src.strategy.signal_generator import SignalGenerator
@@ -174,24 +180,29 @@ class MainWindow(QMainWindow):
             self.ml_predictions_tab.set_db_manager(self.db_manager)
             self.ml_predictions_tab.set_profile_manager(self.profile_manager)
             self.ml_predictions_tab.set_signal_generator(self.signal_generator)
+            self.ml_predictions_tab.set_market_data_manager(self.market_data_layer)
             self.trading_signals_tab.set_db_manager(self.db_manager)
             self.trading_signals_tab.set_profile_manager(self.profile_manager)
             self.trading_signals_tab.set_trading_engine(self.trading_engine)
             self.trading_signals_tab.set_signal_generator(self.signal_generator)
+            self.trading_signals_tab.set_market_data_manager(self.market_data_layer)
             
             # Set managers in execution layer tabs (Phase 4A/B)
             self.execution_tab.set_db_manager(self.db_manager)
             self.execution_tab.set_profile_manager(self.profile_manager)
             self.execution_tab.set_trade_executor(self.trade_executor)
             self.execution_tab.set_alpaca_broker(self.alpaca_broker)
+            self.execution_tab.set_market_data_manager(self.market_data_layer)
             
             self.positions_tab.set_db_manager(self.db_manager)
             self.positions_tab.set_profile_manager(self.profile_manager)
             self.positions_tab.set_position_monitor(self.position_monitor)
+            self.positions_tab.set_market_data_manager(self.market_data_layer)
             
             self.performance_tab.set_db_manager(self.db_manager)
             self.performance_tab.set_profile_manager(self.profile_manager)
             self.performance_tab.set_performance_tracker(self.performance_tracker)
+            self.performance_tab.set_market_data_manager(self.market_data_layer)
             
             self.statusBar().showMessage("Managers initialized successfully")
             
