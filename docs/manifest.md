@@ -9,9 +9,17 @@
 - **Last Updated**: 2025-07-26
 - **Status**: Active Development
 - **Backup Status**: ✅ Fully backed up to GitHub
-- **Current Version**: 0.4.17 - Critical UI-Backend Compatibility Fixes
+- **Current Version**: 0.4.17.1 - ML Predictions Market Data Manager Fix
 
 ## Version Summary
+
+### Version 0.4.17.1 (2025-07-30) - ML Predictions Market Data Manager Fix
+- **Critical Fix**: Resolved ML Predictions tab "Market data manager not available" error
+- **Key Features**: ML predictions now properly generate with real market data access
+- **Architecture**: Proper dependency injection of MarketDataManager for all UI tabs
+- **Status**: ML predictions tab fully operational with real-time market data
+- **Test Status**: Market data access validated across all UI components
+- **Validation Status**: All tabs now have complete dependency injection for data access
 
 ### Version 0.4.17 (2025-07-30) - Critical UI-Backend Compatibility Fixes
 - **Major Milestone**: Complete resolution of UI-backend method compatibility issues

@@ -2,6 +2,30 @@
 
 All notable changes to the AI-Driven Stock Trade Advisor project will be documented in this file.
 
+## Version 0.4.17.1 (2025-07-30) - ML Predictions Market Data Manager Fix
+- **Critical Fix**: Resolved ML Predictions tab "Market data manager not available" error
+- **Key Features**: ML predictions now properly generate with real market data access
+- **Architecture**: Proper dependency injection of MarketDataManager for all UI tabs
+- **Status**: ML predictions tab fully operational with real-time market data
+- **Test Status**: Market data access validated across all UI components
+- **Validation Status**: All tabs now have complete dependency injection for data access
+
+### Critical Fixes Made:
+- **Main Window**: Added initialization of MarketDataManager from data layer
+- **ML Predictions Tab**: Set market data manager dependency to enable prediction generation
+- **All UI Tabs**: Ensured market data manager is properly injected where needed
+- **Dependency Resolution**: Fixed missing dependency that prevented ML predictions from working
+- **Real-time Data**: All tabs now have access to live market data for accurate analysis
+- **Error Elimination**: Removed "Market data manager not available" error completely
+
+### Technical Improvements:
+- **Dependency Injection**: Complete and proper dependency injection across all UI components
+- **Data Access**: Real-time market data access for ML predictions and analysis
+- **Component Communication**: Seamless data flow between UI and backend data systems
+- **Error Prevention**: Robust initialization prevents missing dependency errors
+- **Performance**: Optimized data access patterns for better responsiveness
+- **Reliability**: Consistent data manager availability across all application tabs
+
 ## Version 0.4.17 (2025-07-30) - Critical UI-Backend Compatibility Fixes
 - **Major Milestone**: Complete resolution of UI-backend method compatibility issues
 - **Key Features**: All UI components now properly communicate with backend classes, AttributeError exceptions eliminated

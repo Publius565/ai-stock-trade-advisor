@@ -12,6 +12,13 @@ This file tracks all planned features and tasks with their completion status.
 - [x] Add missing generate_signal() alias method to SignalGenerator class
 - [x] Fix get_portfolio_summary() method in PositionMonitor to handle missing columns gracefully
 
+### ML Predictions Market Data Manager Fix (Version 0.4.17.1) - COMPLETED
+- [x] Fix ML predictions tab missing market data manager dependency
+- [x] Add market data layer manager initialization in main window
+- [x] Set market data managers for all UI tabs that need them
+- [x] Resolve "Market data manager not available" error in ML Predictions tab
+- [x] Ensure proper dependency injection across all UI components
+
 ## High Priority Tasks
 
 ### 🔄 In Progress Tasks

@@ -1839,3 +1839,28 @@ def _calculate_risk_score(self, assessment: Dict[str, Any]) -> int:
 - Watchlist functionality works seamlessly
 
 **Rules Triggered**: 2.1 (Git repository maintenance), 4.1 (CHANGELOG.md), 4.3 (devreadme.txt), 4.4 (chathistory.md), 4.5 (manifest.md)
+
+## 2025-07-30 22:30:00 - ML Predictions Market Data Manager Fix (Version 0.4.17.1)
+
+**Issue Reported**: ML Predictions tab showing "Error generating prediction: Market data manager not available"
+
+**Analysis Performed**:
+- Identified missing MarketDataManager dependency in ML predictions tab
+- Discovered two different MarketDataManager classes in system:
+  1. `src.utils.market_data_manager.MarketDataManager` (database-focused)
+  2. `src.data_layer.market_data.MarketDataManager` (API-focused for fetching market data)
+- Found that main window was not initializing or setting the API-focused MarketDataManager
+
+**Solutions Implemented**:
+1. **Main Window Enhancement**: Added initialization of `src.data_layer.market_data.MarketDataManager`
+2. **Dependency Injection**: Set market data manager for ML predictions tab via `set_market_data_manager()`
+3. **Complete Coverage**: Added market data manager to all UI tabs that need it (trading signals, execution, positions, performance)
+4. **Proper Cache Integration**: Used database manager's cache directory for market data manager initialization
+
+**Testing Results**:
+- Market data manager import test successful
+- ML predictions tab should now generate predictions with real market data
+- All UI tabs have proper dependency injection for data access
+- Eliminated "Market data manager not available" error
+
+**Rules Triggered**: 2.1 (Git repository maintenance), 4.1 (CHANGELOG.md), 4.5 (manifest.md)
