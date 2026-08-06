@@ -1782,4 +1782,24 @@ def _calculate_risk_score(self, assessment: Dict[str, Any]) -> int:
 
 ---
 
+## 2026-08-06 — Cloudflare Trade MVP (offline-executable)
+
+### Session Summary
+- Planned and implemented Cloudflare-hosted Trade Advisor MVP under `cloud/trade/`
+- No live Cloudflare account in this agent — local Wrangler + D1 only
+- Identity: Publiusly-style shared `users` + `app_memberships` (local mirror); finalize against production D1 at home
+- Target host: `trade.publius.com` (DNS deferred)
+
+### Delivered
+- Worker API (Hono): auth/session, profile, watchlists, scanner, MockBroker/Alpaca, orders, positions
+- React SPA: login + MVP pages
+- D1 migration + seed (`trader@example.com` / `password123`)
+- Docs: `docs/CLOUD_MVP.md`, `cloud/trade/README.md`
+- Vitest unit tests for crypto, permissions, MockBroker
+
+### Next (at home)
+- Bind Publiusly D1, align users hash/schema, secrets, deploy, DNS
+
+---
+
 *This chat history will be updated with each significant development conversation and decision.* 

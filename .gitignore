@@ -11,6 +11,9 @@ downloads/
 eggs/
 .eggs/
 lib/
+!cloud/
+!cloud/**/lib/
+!cloud/**/lib/**
 lib64/
 parts/
 sdist/
