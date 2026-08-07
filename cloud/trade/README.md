@@ -31,25 +31,28 @@ curl -s http://127.0.0.1:8787/api/health
 ## Layout
 - `src/worker/` — Hono API, auth, MockBroker/Alpaca, scanner
 - `src/web/` — React SPA
-- `migrations/` — D1 schema (`users` mirror, `app_memberships`, `trade_*`)
-- `scripts/seed-local.sql` — local demo data
+- `migrations/` — D1 schema (Publiusly `users`/`user_credentials` mirror + `app_memberships` + `trade_*`)
+- `scripts/seed-local.sql` — local demo data only (never seed remote)
 
 ## Identity model
-Shared Publiusly-style D1:
-- `users` — local mirror (align columns/hash to production at home via `UserRepository` in `src/worker/lib/auth.ts`)
+Shared production D1 **`publiusly-db`** (bound in `wrangler.jsonc`):
+- `users` + `user_credentials` — Publiusly identity (do not recreate on prod)
 - `app_memberships` — `app_id = 'trade'`, `permissions_json` e.g. `{"paper_trade":true}`
-- Sessions: HttpOnly `trade_session` cookie
+- `sessions` — trade-owned HttpOnly `trade_session` cookie (separate from Publiusly JWT/`refresh_tokens`)
 
-Password format (local MVP): `pbkdf2$iterations$saltB64$hashB64` (Web Crypto PBKDF2-SHA256).
+Password format (Publiusly): `iterationsHex:saltHex:hashHex` (Web Crypto PBKDF2-SHA256, 100000 iters). Login requires `email_verified = 1`.
 
-## Home finalize checklist
-1. `wrangler login` (or set `CLOUDFLARE_API_TOKEN` + account id)
-2. Set `database_id` in [`wrangler.jsonc`](../cloud/trade/wrangler.jsonc) to the **Publiusly production D1** id (same binding both Workers can use)
-3. Apply only **new** migrations (`app_memberships`, `trade_*`, `sessions` if missing) — do **not** recreate production `users`
-4. Align `UserRepository` / `verifyPassword` to live Publiusly column names and hash algorithm
-5. `wrangler secret put SESSION_SECRET` (and optional `ALPACA_*`, `ALPHA_VANTAGE_API_KEY`)
-6. Deploy Worker/Pages; attach custom domain **`trade.publius.com`** (CNAME on `publius.com` zone — leave apex alone)
-7. `INSERT` `app_memberships` rows for real Publiusly users who should access Trade
+## Production status (AGE-8 done)
+1. ~~Bind Publiusly D1 `database_id`~~ — done
+2. ~~Align `UserRepository` / `verifyPassword`~~ — done
+3. ~~Apply additive migrations remotely~~ (`sessions`, `app_memberships`, `trade_*`) — done
+4. Secrets + deploy + DNS `trade.publius.com` — **AGE-9**
+5. `INSERT` `app_memberships` for real Publiusly users — **AGE-10**
+
+```bash
+# Additive remote schema (already applied once):
+npm run db:migrate:remote
+```
 
 ## Out of MVP
 ML predictions UI, signals polish, portfolio analytics/backtesting, continuous scanners, sklearn training (Containers later).

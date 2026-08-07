@@ -1,28 +1,47 @@
--- Local seed for wrangler D1.
--- Password for trader@example.com is: password123
--- Hash = PBKDF2-SHA256 (see scripts/generate-seed-hash.mjs)
+-- Local seed for wrangler D1 only. NEVER run against remote publiusly-db.
+-- Password for both users: password123
+-- Hash = Publiusly PBKDF2-SHA256 (see scripts/generate-seed-hash.mjs)
 
-INSERT OR IGNORE INTO users (id, email, password_hash, name, created_at, updated_at, is_active)
-VALUES (
+INSERT OR IGNORE INTO users (
+  id, email, email_verified, display_name, role, created_at, updated_at, last_login_at
+) VALUES (
   'user_trader_001',
   'trader@example.com',
-  'pbkdf2$100000$c2VlZGxvY2FsZGV2c2FsdA==$91YOKIv63bJz8MoX/YB9+hwHFV/gPo5JWWSea+pgSto=',
+  1,
   'Demo Trader',
-  unixepoch(),
-  unixepoch(),
-  1
+  'user',
+  '2026-01-01T00:00:00.000Z',
+  '2026-01-01T00:00:00.000Z',
+  NULL
 );
 
--- User without trade access (login should 403 AppAccessDenied)
-INSERT OR IGNORE INTO users (id, email, password_hash, name, created_at, updated_at, is_active)
-VALUES (
+INSERT OR IGNORE INTO users (
+  id, email, email_verified, display_name, role, created_at, updated_at, last_login_at
+) VALUES (
   'user_noaccess_001',
   'noaccess@example.com',
-  'pbkdf2$100000$c2VlZGxvY2FsZGV2c2FsdA==$91YOKIv63bJz8MoX/YB9+hwHFV/gPo5JWWSea+pgSto=',
+  1,
   'No Access User',
-  unixepoch(),
-  unixepoch(),
-  1
+  'user',
+  '2026-01-01T00:00:00.000Z',
+  '2026-01-01T00:00:00.000Z',
+  NULL
+);
+
+INSERT OR IGNORE INTO user_credentials (user_id, password_hash, created_at, updated_at)
+VALUES (
+  'user_trader_001',
+  '186a0:736565646c6f63616c64657673616c74:f7560e288bfaddb273f0ca17fd807dfa1c07155fe03e8e4959649e6bea604ada',
+  '2026-01-01T00:00:00.000Z',
+  '2026-01-01T00:00:00.000Z'
+);
+
+INSERT OR IGNORE INTO user_credentials (user_id, password_hash, created_at, updated_at)
+VALUES (
+  'user_noaccess_001',
+  '186a0:736565646c6f63616c64657673616c74:f7560e288bfaddb273f0ca17fd807dfa1c07155fe03e8e4959649e6bea604ada',
+  '2026-01-01T00:00:00.000Z',
+  '2026-01-01T00:00:00.000Z'
 );
 
 INSERT OR IGNORE INTO app_memberships (

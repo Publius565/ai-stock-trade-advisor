@@ -1,5 +1,9 @@
 const enc = new TextEncoder();
 
+const PBKDF2_ITERATIONS = 100_000;
+const PBKDF2_KEY_LENGTH = 256; // bits
+const SALT_LENGTH = 16;
+
 function toB64(buf: ArrayBuffer | Uint8Array): string {
   const bytes = buf instanceof Uint8Array ? buf : new Uint8Array(buf);
   let s = "";
@@ -7,27 +11,37 @@ function toB64(buf: ArrayBuffer | Uint8Array): string {
   return btoa(s);
 }
 
-function fromB64(b64: string): Uint8Array {
-  const bin = atob(b64);
-  const out = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
-  return out;
+function uint8ArrayToHex(arr: Uint8Array): string {
+  return Array.from(arr)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
 
-function timingSafeEqual(a: string, b: string): boolean {
+function hexToUint8Array(hex: string): Uint8Array {
+  const matches = hex.match(/.{1,2}/g);
+  if (!matches) {
+    throw new Error("Invalid hex string");
+  }
+  return new Uint8Array(matches.map((byte) => Number.parseInt(byte, 16)));
+}
+
+function timingSafeEqualBytes(a: Uint8Array, b: Uint8Array): boolean {
   if (a.length !== b.length) return false;
   let diff = 0;
-  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  for (let i = 0; i < a.length; i++) diff |= a[i]! ^ b[i]!;
   return diff === 0;
 }
 
-/** Format: pbkdf2$iterations$saltB64$hashB64 */
+/**
+ * Hash a password using PBKDF2-SHA256 (Publiusly production format).
+ * Format: iterationsHex:saltHex:hashHex
+ */
 export async function hashPassword(
   password: string,
-  iterations = 100_000,
+  iterations = PBKDF2_ITERATIONS,
   salt?: Uint8Array,
 ): Promise<string> {
-  const usedSalt = salt ?? crypto.getRandomValues(new Uint8Array(16));
+  const usedSalt = salt ?? crypto.getRandomValues(new Uint8Array(SALT_LENGTH));
   const keyMaterial = await crypto.subtle.importKey(
     "raw",
     enc.encode(password),
@@ -42,23 +56,46 @@ export async function hashPassword(
   const bits = await crypto.subtle.deriveBits(
     { name: "PBKDF2", salt: saltBuffer, iterations, hash: "SHA-256" },
     keyMaterial,
-    256,
+    PBKDF2_KEY_LENGTH,
   );
-  return `pbkdf2$${iterations}$${toB64(usedSalt)}$${toB64(bits)}`;
+  return `${iterations.toString(16)}:${uint8ArrayToHex(usedSalt)}:${uint8ArrayToHex(new Uint8Array(bits))}`;
 }
 
+/** Verify against Publiusly `iterationsHex:saltHex:hashHex` hashes. */
 export async function verifyPassword(
   password: string,
   stored: string,
 ): Promise<boolean> {
-  const parts = stored.split("$");
-  if (parts.length !== 4 || parts[0] !== "pbkdf2") return false;
-  const iterations = Number(parts[1]);
-  const salt = fromB64(parts[2]);
-  const expected = parts[3];
-  const actual = await hashPassword(password, iterations, salt);
-  const actualHash = actual.split("$")[3];
-  return timingSafeEqual(actualHash, expected);
+  try {
+    const [iterationsHex, saltHex, hashHex] = stored.split(":");
+    if (!iterationsHex || !saltHex || !hashHex) return false;
+
+    const iterations = Number.parseInt(iterationsHex, 16);
+    if (!Number.isFinite(iterations) || iterations <= 0) return false;
+
+    const salt = hexToUint8Array(saltHex);
+    const expectedHash = hexToUint8Array(hashHex);
+
+    const keyMaterial = await crypto.subtle.importKey(
+      "raw",
+      enc.encode(password),
+      "PBKDF2",
+      false,
+      ["deriveBits"],
+    );
+    const saltBuffer = salt.buffer.slice(
+      salt.byteOffset,
+      salt.byteOffset + salt.byteLength,
+    ) as ArrayBuffer;
+    const derived = await crypto.subtle.deriveBits(
+      { name: "PBKDF2", salt: saltBuffer, iterations, hash: "SHA-256" },
+      keyMaterial,
+      PBKDF2_KEY_LENGTH,
+    );
+    return timingSafeEqualBytes(new Uint8Array(derived), expectedHash);
+  } catch {
+    return false;
+  }
 }
 
 export async function sha256Hex(input: string): Promise<string> {

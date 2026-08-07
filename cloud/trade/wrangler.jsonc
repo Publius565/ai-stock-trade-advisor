@@ -13,9 +13,9 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "trade-advisor-db",
-      // Replace with Publiusly production D1 database_id when deploying at home
-      "database_id": "00000000-0000-0000-0000-000000000001",
+      "database_name": "publiusly-db",
+      // Shared Publiusly production identity D1
+      "database_id": "715e2233-fcf1-45c7-a38a-e6d84aed5da0",
       "migrations_dir": "migrations"
     }
   ],
