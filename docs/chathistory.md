@@ -1824,4 +1824,5 @@ def _calculate_risk_score(self, assessment: Dict[str, Any]) -> int:
 
 ---
 
-*This chat history will be updated with each significant development conversation and decision.* 
+*This chat history will be updated with each significant development conversation and decision.*
+ 
