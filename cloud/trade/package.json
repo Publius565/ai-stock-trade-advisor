@@ -11,9 +11,10 @@
     "preview": "npm run build:web && wrangler dev",
     "test": "vitest run",
     "test:watch": "vitest",
-    "db:migrate:local": "wrangler d1 migrations apply trade-advisor-db --local",
-    "db:seed:local": "wrangler d1 execute trade-advisor-db --local --file=scripts/seed-local.sql",
+    "db:migrate:local": "wrangler d1 migrations apply publiusly-db --local",
+    "db:seed:local": "wrangler d1 execute publiusly-db --local --file=scripts/seed-local.sql",
     "db:setup:local": "npm run db:migrate:local && npm run db:seed:local",
+    "db:migrate:remote": "wrangler d1 migrations apply publiusly-db --remote",
     "types": "wrangler types",
     "check": "tsc --noEmit && vitest run"
   },

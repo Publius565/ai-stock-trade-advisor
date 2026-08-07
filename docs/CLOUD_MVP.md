@@ -12,11 +12,10 @@ npm run build:web && npm run db:setup:local && npm run preview
 
 Open http://127.0.0.1:8787 — login `trader@example.com` / `password123`.
 
-## Home finalize (production)
-1. Cloudflare auth + bind Publiusly D1 `database_id`
-2. Align `users` adapter + password verify to live schema
-3. Secrets + deploy + DNS `trade.publius.com`
-4. Grant `app_memberships` for real users (`app_id='trade'`)
+## Production
+- **AGE-8 done:** bound to `publiusly-db`, auth adapter + Publiusly PBKDF2 hash, additive remote tables (`sessions`, `app_memberships`, `trade_*`)
+- **AGE-9:** secrets + deploy + DNS `trade.publius.com`
+- **AGE-10:** grant `app_memberships` for real users (`app_id='trade'`)
 
 ## API
 - Auth: `POST /api/auth/login|logout`, `GET /api/auth/me`

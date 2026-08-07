@@ -5,9 +5,9 @@ import { requirePermission } from "../src/worker/lib/auth";
 import type { AuthUser } from "../src/worker/types";
 
 describe("password hashing", () => {
-  it("round-trips PBKDF2 verify", async () => {
+  it("round-trips Publiusly PBKDF2 hex verify", async () => {
     const stored = await hashPassword("password123", 10_000);
-    expect(stored.startsWith("pbkdf2$")).toBe(true);
+    expect(stored.startsWith("2710:")).toBe(true); // 10000 = 0x2710
     expect(await verifyPassword("password123", stored)).toBe(true);
     expect(await verifyPassword("wrong", stored)).toBe(false);
   });
@@ -15,6 +15,9 @@ describe("password hashing", () => {
   it("matches seed salt format", async () => {
     const salt = new TextEncoder().encode("seedlocaldevsalt");
     const stored = await hashPassword("password123", 100_000, salt);
+    expect(stored).toBe(
+      "186a0:736565646c6f63616c64657673616c74:f7560e288bfaddb273f0ca17fd807dfa1c07155fe03e8e4959649e6bea604ada",
+    );
     expect(await verifyPassword("password123", stored)).toBe(true);
   });
 });

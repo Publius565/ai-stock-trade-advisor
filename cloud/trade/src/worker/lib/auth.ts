@@ -6,7 +6,7 @@ type UserRow = {
   email: string;
   password_hash: string;
   name: string | null;
-  is_active: number;
+  email_verified: number;
 };
 
 type MembershipRow = {
@@ -16,8 +16,8 @@ type MembershipRow = {
 };
 
 /**
- * Thin adapter over Publiusly-compatible `users` + `app_memberships`.
- * At home, adjust column names here if production schema differs.
+ * Adapter over Publiusly production identity (`users` + `user_credentials`)
+ * plus trade-owned `app_memberships`.
  */
 export class UserRepository {
   constructor(
@@ -29,8 +29,12 @@ export class UserRepository {
     return (
       (await this.db
         .prepare(
-          `SELECT id, email, password_hash, name, is_active
-           FROM users WHERE email = ? COLLATE NOCASE LIMIT 1`,
+          `SELECT u.id, u.email, u.display_name AS name, u.email_verified,
+                  c.password_hash
+           FROM users u
+           JOIN user_credentials c ON c.user_id = u.id
+           WHERE u.email = ? COLLATE NOCASE
+           LIMIT 1`,
         )
         .bind(email.trim())
         .first<UserRow>()) ?? null
@@ -78,12 +82,22 @@ export class AuthService {
     | { ok: false; status: 401 | 403; error: string }
   > {
     const user = await this.users.findByEmail(email);
-    if (!user || !user.is_active) {
+    if (!user) {
       return { ok: false, status: 401, error: "Invalid email or password" };
     }
+
     const valid = await verifyPassword(password, user.password_hash);
     if (!valid) {
       return { ok: false, status: 401, error: "Invalid email or password" };
+    }
+
+    // Match Publiusly: require email verification before login
+    if (!user.email_verified) {
+      return {
+        ok: false,
+        status: 403,
+        error: "EmailNotVerified: please verify your email before signing in",
+      };
     }
 
     const membership = await this.users.getMembership(user.id);
@@ -135,11 +149,12 @@ export class AuthService {
     const tokenHash = await sha256Hex(token);
     const now = Math.floor(Date.now() / 1000);
     const row = await this.env.DB.prepare(
-      `SELECT u.id, u.email, u.name, m.role, m.permissions_json, m.status, s.expires_at
+      `SELECT u.id, u.email, u.display_name AS name, u.email_verified,
+              m.role, m.permissions_json, m.status, s.expires_at
        FROM sessions s
        JOIN users u ON u.id = s.user_id
        JOIN app_memberships m ON m.user_id = u.id AND m.app_id = ?
-       WHERE s.token_hash = ? AND u.is_active = 1
+       WHERE s.token_hash = ? AND u.email_verified = 1
        LIMIT 1`,
     )
       .bind(this.env.APP_ID || "trade", tokenHash)
@@ -147,6 +162,7 @@ export class AuthService {
         id: string;
         email: string;
         name: string | null;
+        email_verified: number;
         role: string;
         permissions_json: string;
         status: string;

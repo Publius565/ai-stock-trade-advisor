@@ -1,16 +1,18 @@
 /**
- * Generate PBKDF2 password hash in the format used by the Worker auth module.
- * Usage: node scripts/generate-seed-hash.mjs [password] [saltBase64?]
+ * Generate Publiusly PBKDF2 password hash (iterationsHex:saltHex:hashHex).
+ * Usage: node scripts/generate-seed-hash.mjs [password] [saltHex?]
  */
 import { webcrypto } from "node:crypto";
 
 const password = process.argv[2] ?? "password123";
-const saltB64 = process.argv[3] ?? Buffer.from("seedlocaldevsalt").toString("base64");
+const saltHex =
+  process.argv[3] ??
+  Buffer.from("seedlocaldevsalt").toString("hex"); // 16 bytes → 32 hex chars
 const iterations = 100_000;
 
-async function hashPassword(pw, saltBase64) {
+async function hashPassword(pw, saltHexStr) {
   const enc = new TextEncoder();
-  const salt = Buffer.from(saltBase64, "base64");
+  const salt = Buffer.from(saltHexStr, "hex");
   const keyMaterial = await webcrypto.subtle.importKey(
     "raw",
     enc.encode(pw),
@@ -23,9 +25,9 @@ async function hashPassword(pw, saltBase64) {
     keyMaterial,
     256,
   );
-  const hashB64 = Buffer.from(bits).toString("base64");
-  return `pbkdf2$${iterations}$${saltBase64}$${hashB64}`;
+  const hashHex = Buffer.from(bits).toString("hex");
+  return `${iterations.toString(16)}:${saltHexStr}:${hashHex}`;
 }
 
-const out = await hashPassword(password, saltB64);
+const out = await hashPassword(password, saltHex);
 console.log(out);

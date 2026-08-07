@@ -1802,4 +1802,26 @@ def _calculate_risk_score(self, assessment: Dict[str, Any]) -> int:
 
 ---
 
+## 2026-08-06 — Asana project created (home PC)
+
+### Session Summary
+- Asana MCP ready; created project **Agent Green** (TaskPrefix: AGE)
+- Recorded branch `cursor/trade-cloud-mvp-4d1e` work as AGE-1…AGE-7 (Done, versions 0.1.0–0.5.2)
+- Backlog follow-ups: AGE-8 D1 bind/align, AGE-9 deploy trade.publius.com, AGE-10 grant memberships
+
+---
+
+## 2026-08-06 — AGE-8: Bind Publiusly D1 + align auth
+
+### Session Summary
+- Bound trade Worker to production `publiusly-db` (`wrangler.jsonc` + npm db scripts)
+- Ported Publiusly PBKDF2 hex hash (`iterationsHex:saltHex:hashHex`) in `crypto.ts`
+- Rewrote `UserRepository` / `AuthService` for `users` + `user_credentials`, `display_name`, `email_verified`
+- Reshaped local migration/seed to match prod identity; trade-owned `sessions` + `app_memberships` + `trade_*`
+- Applied additive migration remotely; verified tables (identity unchanged, trade tables present)
+- Local: tests pass + `db:setup:local` OK
+- Asana AGE-8 → Done (0.6.0); AGE-9 deploy + AGE-10 membership grants remain
+
+---
+
 *This chat history will be updated with each significant development conversation and decision.* 

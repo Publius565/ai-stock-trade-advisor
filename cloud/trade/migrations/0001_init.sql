@@ -1,18 +1,30 @@
--- Local mirror of Publiusly identity + trade MVP tables
--- Align users columns/hash algorithm to production Publiusly D1 at home
+-- Publiusly identity mirror (users + user_credentials) + trade MVP tables.
+-- On production publiusly-db: CREATE IF NOT EXISTS is a no-op for existing
+-- identity tables and only adds sessions / app_memberships / trade_*.
 
 PRAGMA foreign_keys = ON;
 
+-- Match production Publiusly schema (services/api/src/auth/schema.sql)
 CREATE TABLE IF NOT EXISTS users (
-  id TEXT PRIMARY KEY NOT NULL,
-  email TEXT NOT NULL UNIQUE COLLATE NOCASE,
-  password_hash TEXT NOT NULL,
-  name TEXT,
-  created_at INTEGER NOT NULL DEFAULT (unixepoch()),
-  updated_at INTEGER NOT NULL DEFAULT (unixepoch()),
-  is_active INTEGER NOT NULL DEFAULT 1
+  id TEXT PRIMARY KEY,
+  email TEXT UNIQUE NOT NULL,
+  email_verified INTEGER NOT NULL DEFAULT 0,
+  display_name TEXT,
+  role TEXT NOT NULL DEFAULT 'user',
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  last_login_at TEXT
 );
 
+CREATE TABLE IF NOT EXISTS user_credentials (
+  user_id TEXT PRIMARY KEY,
+  password_hash TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Trade-owned session cookies (separate from Publiusly refresh_tokens / JWT)
 CREATE TABLE IF NOT EXISTS sessions (
   id TEXT PRIMARY KEY NOT NULL,
   user_id TEXT NOT NULL,
@@ -101,6 +113,7 @@ CREATE TABLE IF NOT EXISTS trade_positions (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token_hash);
 CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
 CREATE INDEX IF NOT EXISTS idx_memberships_user_app ON app_memberships(user_id, app_id);
