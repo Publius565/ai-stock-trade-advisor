@@ -1,0 +1,6 @@
+SESSION_SECRET=local-dev-session-secret
+# Optional — without these, MockBroker is used:
+# ALPACA_API_KEY=
+# ALPACA_SECRET_KEY=
+# ALPACA_BASE_URL=https://paper-api.alpaca.markets
+# ALPHA_VANTAGE_API_KEY=

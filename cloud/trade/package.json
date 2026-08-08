@@ -1,0 +1,38 @@
+{
+  "name": "trade-advisor",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:worker": "wrangler dev",
+    "build": "npm run build:web",
+    "build:web": "vite build",
+    "preview": "npm run build:web && wrangler dev",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "db:migrate:local": "wrangler d1 migrations apply publiusly-db --local",
+    "db:seed:local": "wrangler d1 execute publiusly-db --local --file=scripts/seed-local.sql",
+    "db:setup:local": "npm run db:migrate:local && npm run db:seed:local",
+    "db:migrate:remote": "wrangler d1 migrations apply publiusly-db --remote",
+    "types": "wrangler types",
+    "check": "tsc --noEmit && vitest run"
+  },
+  "dependencies": {
+    "hono": "^4.7.2",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-router-dom": "^7.2.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250317.0",
+    "@types/node": "^26.1.2",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5.8.2",
+    "vite": "^6.2.0",
+    "vitest": "^3.0.8",
+    "wrangler": "^4.35.0"
+  }
+}

@@ -1779,7 +1779,7 @@ def _calculate_risk_score(self, assessment: Dict[str, Any]) -> int:
 
 ---
 
-*This chat history will be updated with each significant development conversation and decision.* 
+---
 
 ## 2025-07-27 15:30:00 - Mock Data Elimination Complete
 
@@ -1864,3 +1864,49 @@ def _calculate_risk_score(self, assessment: Dict[str, Any]) -> int:
 - Eliminated "Market data manager not available" error
 
 **Rules Triggered**: 2.1 (Git repository maintenance), 4.1 (CHANGELOG.md), 4.5 (manifest.md)
+
+---
+
+## 2026-08-06 — Cloudflare Trade MVP (offline-executable)
+
+### Session Summary
+- Planned and implemented Cloudflare-hosted Trade Advisor MVP under `cloud/trade/`
+- No live Cloudflare account in this agent — local Wrangler + D1 only
+- Identity: Publiusly-style shared `users` + `app_memberships` (local mirror); finalize against production D1 at home
+- Target host: `trade.publius.com` (DNS deferred)
+
+### Delivered
+- Worker API (Hono): auth/session, profile, watchlists, scanner, MockBroker/Alpaca, orders, positions
+- React SPA: login + MVP pages
+- D1 migration + seed (`trader@example.com` / `password123`)
+- Docs: `docs/CLOUD_MVP.md`, `cloud/trade/README.md`
+- Vitest unit tests for crypto, permissions, MockBroker
+
+### Next (at home)
+- Bind Publiusly D1, align users hash/schema, secrets, deploy, DNS
+
+---
+
+## 2026-08-06 — Asana project created (home PC)
+
+### Session Summary
+- Asana MCP ready; created project **Agent Green** (TaskPrefix: AGE)
+- Recorded branch `cursor/trade-cloud-mvp-4d1e` work as AGE-1…AGE-7 (Done, versions 0.1.0–0.5.2)
+- Backlog follow-ups: AGE-8 D1 bind/align, AGE-9 deploy trade.publius.com, AGE-10 grant memberships
+
+---
+
+## 2026-08-06 — AGE-8: Bind Publiusly D1 + align auth
+
+### Session Summary
+- Bound trade Worker to production `publiusly-db` (`wrangler.jsonc` + npm db scripts)
+- Ported Publiusly PBKDF2 hex hash (`iterationsHex:saltHex:hashHex`) in `crypto.ts`
+- Rewrote `UserRepository` / `AuthService` for `users` + `user_credentials`, `display_name`, `email_verified`
+- Reshaped local migration/seed to match prod identity; trade-owned `sessions` + `app_memberships` + `trade_*`
+- Applied additive migration remotely; verified tables (identity unchanged, trade tables present)
+- Local: tests pass + `db:setup:local` OK
+- Asana AGE-8 → Done (0.6.0); AGE-9 deploy + AGE-10 membership grants remain
+
+---
+
+*This chat history will be updated with each significant development conversation and decision.*
